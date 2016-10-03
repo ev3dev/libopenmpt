@@ -1,0 +1,5 @@
+libopenmpt (0.2.7025~beta20.1-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #839185)
+
+ -- James Cowgill <jcowgill@debian.org>  Mon, 03 Oct 2016 10:04:29 +0100
