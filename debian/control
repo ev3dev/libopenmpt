@@ -48,7 +48,13 @@ Package: libopenmpt-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libopenmpt0 (= ${binary:Version}), ${misc:Depends}
+Depends:
+ libmpg123-dev,
+ libogg-dev,
+ libopenmpt0 (= ${binary:Version}),
+ libvorbis-dev,
+ zlib1g-dev,
+ ${misc:Depends},
 Description: module music decoding library based on OpenMPT -- development files
  libopenmpt is a cross-platform C++ and C library to decode tracked music
  files (modules) into a raw PCM audio stream. It is based on the player code
