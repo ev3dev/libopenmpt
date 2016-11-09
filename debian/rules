@@ -12,3 +12,6 @@ build:
 
 override_dh_auto_configure:
 	dh_auto_configure -- --without-ltdl
+
+override_dh_installchangelogs:
+	dh_installchangelogs libopenmpt/dox/changelog.md
