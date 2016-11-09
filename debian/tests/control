@@ -1,2 +1,2 @@
 Tests: build
-Depends: gcc, g++, libopenmpt-dev
+Depends: gcc, g++, libopenmpt-dev, pkg-config
