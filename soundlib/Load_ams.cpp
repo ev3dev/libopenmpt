@@ -388,7 +388,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadMagic("Extreme")
 		|| !file.ReadConvertEndianness(fileHeader)
 		|| !file.Skip(fileHeader.extraSize)
-		|| !file.CanRead(fileHeader.numSamps * sizeof(AMSSampleHeader))
+		|| !file.CanRead(3u + fileHeader.numSamps * (1u + sizeof(AMSSampleHeader)) + fileHeader.numOrds * 2u + fileHeader.numPats * 4u)
 		|| fileHeader.versionHigh != 0x01)
 	{
 		return false;
@@ -446,10 +446,11 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read packed song message
 	const uint16 packedLength = file.ReadUint16LE();
-	if(packedLength)
+	if(packedLength && file.CanRead(packedLength))
 	{
-		std::vector<uint8> textIn, textOut;
+		std::vector<uint8> textIn;
 		file.ReadVector(textIn, packedLength);
+		std::string textOut;
 		textOut.reserve(packedLength);
 
 		for(std::vector<uint8>::iterator c = textIn.begin(); c != textIn.end(); c++)
@@ -463,11 +464,10 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
-		std::string str(textOut.begin(), textOut.end());
-		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
+		textOut = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, textOut);
 
 		// Packed text doesn't include any line breaks!
-		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(str.c_str()), str.length(), 76, 0);
+		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(textOut.c_str()), textOut.length(), 76, 0);
 	}
 
 	// Read Order List
@@ -475,7 +475,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
-		for(size_t i = 0; i < fileHeader.numOrds; i++)
+		for(size_t i = 0; i < Order.size(); i++)
 		{
 			Order[i] = orders[i];
 		}
@@ -751,7 +751,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(!ReadAMSString(m_songName, file)
 		|| !file.ReadConvertEndianness(fileHeader)
-		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
+		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2
+		|| !file.CanRead(36u + sizeof(AMS2Description) + fileHeader.numIns * 2u + fileHeader.numOrds * 2u + fileHeader.numPats * 4u))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -799,7 +800,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		if(instrument == nullptr
 			|| !ReadAMSString(instrument->name, file))
 		{
-			return false;
+			break;
 		}
 
 		uint8 numSamples = file.ReadUint8();
@@ -808,7 +809,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(numSamples == 0
 			|| (fileHeader.versionLow > 0 && !file.ReadArray(sampleAssignment))	// v2.01+: 120 Notes
-			|| (fileHeader.versionLow == 0 && !file.ReadArray(reinterpret_cast<uint8 (&) [96]>(sampleAssignment[12]))))	// v2.0: 96 Notes
+			|| (fileHeader.versionLow == 0 && !file.ReadRaw(sampleAssignment + 12, 96)))	// v2.0: 96 Notes
 		{
 			continue;
 		}
@@ -902,33 +903,31 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
-	if(descriptionHeader.packedLen)
+	if(descriptionHeader.packedLen > sizeof(descriptionHeader) && file.CanRead(descriptionHeader.packedLen - sizeof(descriptionHeader)))
 	{
 		const size_t textLength = descriptionHeader.packedLen - sizeof(descriptionHeader);
-		std::vector<uint8> textIn, textOut(descriptionHeader.unpackedLen);
+		std::vector<uint8> textIn;
 		file.ReadVector(textIn, textLength);
+		std::string textOut;
+		textOut.reserve(descriptionHeader.unpackedLen);
 
-		size_t readLen = 0, writeLen = 0;
-		while(readLen < textLength && writeLen < descriptionHeader.unpackedLen)
+		size_t readLen = 0;
+		while(readLen < textLength)
 		{
 			uint8 c = textIn[readLen++];
 			if(c == 0xFF && textLength - readLen >= 2)
 			{
 				c = textIn[readLen++];
 				uint32 count = textIn[readLen++];
-				for(size_t i = std::min<size_t>(descriptionHeader.unpackedLen - writeLen, count); i != 0; i--)
-				{
-					textOut[writeLen++] = c;
-				}
+				textOut.insert(textOut.end(), count, c);
 			} else
 			{
-				textOut[writeLen++] = c;
+				textOut.push_back(c);
 			}
 		}
-		std::string str(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen);
-		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
+		textOut = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, textOut);
 		// Packed text doesn't include any line breaks!
-		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(str.c_str()), str.length(), 74, 0);
+		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(textOut.c_str()), textOut.length(), 74, 0);
 	}
 
 	// Read Order List
@@ -936,7 +935,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadVectorLE(orders, fileHeader.numOrds))
 	{
 		Order.resize(fileHeader.numOrds);
-		for(size_t i = 0; i < fileHeader.numOrds; i++)
+		for(size_t i = 0; i < Order.size(); i++)
 		{
 			Order[i] = orders[i];
 		}
@@ -1024,16 +1023,12 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter)
 //------------------------------------------------------------------------------------------------------------------------
 {
-	int8 *tempBuf = new (std::nothrow) int8[destSize];
-	if(tempBuf == nullptr)
-	{
-		return;
-	}
+	std::vector<int8> tempBuf(destSize, 0);
 
 	// Unpack Loop
 	{
 		const int8 *in = source;
-		int8 *out = tempBuf;
+		int8 *out = &tempBuf[0];
 
 		size_t i = sourceSize, j = destSize;
 		while(i != 0 && j != 0)
@@ -1067,7 +1062,7 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 
 	// Bit Unpack Loop
 	{
-		int8 *out = tempBuf;
+		int8 *out = &tempBuf[0];
 		uint16 bitcount = 0x80;
 		size_t k = 0;
 		uint8 *dst = static_cast<uint8 *>(dest);
@@ -1106,8 +1101,6 @@ void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, 
 			*(out++) = old;
 		}
 	}
-
-	delete[] tempBuf;
 }
 
 

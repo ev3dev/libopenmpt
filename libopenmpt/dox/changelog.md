@@ -5,14 +5,33 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta20.1
+### libopenmpt 0.2-beta20.2 (2016-10-22)
+
+ *  [**Bug**] The C API could crash instead of failing gracefully in
+    out-of-memory situations.
+ *  [**Bug**] `libopenmpt_stream_callbacks_fd.h` and
+    `libopenmpt_stream_callbacks_file.h` were missing in Windows development
+    packages.
+ *  [**Bug**] Plugins did not work correctly when changing the sample rate
+    between two render calls.
+ *  [**Bug**] Possible crashes with malformed IT, AMS, MDL, MED, MPTM, PSM and
+    Startrekker files.
+ *  [**Bug**] Possible hangs with malformed DBM, MPTM and PSM files.
+
+ *  ParamEq plugin emulation didn't do anything at full gain (+15dB).
+ *  Avoid enabling some ProTracker-specific quirks for MOD files most likely
+    created with ScreamTracker 3.
+ *  Tremolo effect only had half the intended strength in MOD files.
+ *  openmpt123: Improved section layout in man page.
+
+### libopenmpt 0.2-beta20.1 (2016-09-03)
 
  *  [**Bug**] The test suite could fail on MacOSX or FreeBSD in non-fatal ways
     when no locale was active.
  *  [**Bug**] Possible crashes with malformed IT, MED, MPTM, PSM and Startrekker 
     files.
 
- *  'Makefile' has now explicit support for FreeBSD with no special option or
+ *  `Makefile` has now explicit support for FreeBSD with no special option or
     configuration required.
 
 ### libopenmpt 0.2-beta20 (2016-08-07)
@@ -422,7 +441,7 @@ is just a high-level summary.
  *  Support building on Android NDK.
  *  Avoid clicks in sample loops when using interpolation.
  *  IT filters are now done in integer instead of floating point. This improves
-    performances, especially on architectures with no or a slow FPU.
+    performance, especially on architectures with no or a slow FPU.
  *  MOD pattern break handling fixes.
  *  Various XM playback improvements.
  *  Improved and switchable dithering when using 16bit integer API.

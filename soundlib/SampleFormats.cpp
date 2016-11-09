@@ -295,9 +295,9 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 //--------------------------------------------------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
-	if(!ReadPATInstrument(nInstr, file)
+	if(!ReadITIInstrument(nInstr, file)
 		&& !ReadXIInstrument(nInstr, file)
-		&& !ReadITIInstrument(nInstr, file)
+		&& !ReadPATInstrument(nInstr, file)
 		// Generic read
 		&& !ReadSampleAsInstrument(nInstr, file, mayNormalize))
 	{
@@ -705,21 +705,15 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		case 7: bitDepth = SampleIO::_64bit; break;
 		}
 
-		SampleIO sampleIO(
-			bitDepth,
-			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
-			SampleIO::littleEndian,
-			(wavFile.GetBitsPerSample() > 8) ? SampleIO::signedPCM : SampleIO::unsignedPCM);
+		sampleIO |= bitDepth;
+		if(wavFile.GetBitsPerSample() <= 8)
+			sampleIO |= SampleIO::unsignedPCM;
 
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
-		{
 			sampleIO |= SampleIO::floatPCM;
-		}
 
 		if(mayNormalize)
-		{
 			sampleIO.MayNormalize();
-		}
 
 		sampleIO.ReadSample(sample, sampleChunk);
 	}
@@ -1376,11 +1370,21 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 		m_nSamples = nSample;
 	}
 
-	// Read first sample header
+	uint16 numSamples = fileHeader.numSamples;
+	FileReader::off_t samplePos = sizeof(XIInstrumentHeader) + numSamples * sizeof(XMSample);
+	// Preferrably read the middle-C sample
+	uint8 sample = fileHeader.instrument.sampleMap[48];
+	if(sample >= fileHeader.numSamples)
+		sample = 0;
 	XMSample sampleHeader;
-	file.ReadConvertEndianness(sampleHeader);
+	while(sample--)
+	{
+		file.ReadConvertEndianness(sampleHeader);
+		samplePos += sampleHeader.length;
+	}
+	file.ReadStruct(sampleHeader);
 	// Gotta skip 'em all!
-	file.Skip(sizeof(XMSample) * (fileHeader.numSamples - 1));
+	file.Seek(samplePos);
 
 	DestroySampleThreadsafe(nSample);
 
@@ -1891,14 +1895,29 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 
 	file.Rewind();
 	if(!file.ReadConvertEndianness(instrumentHeader)
-		|| memcmp(instrumentHeader.id, "IMPI", 4)
-		|| instrumentHeader.nos == 0)
+		|| memcmp(instrumentHeader.id, "IMPI", 4))
 	{
 		return false;
 	}
 	file.Rewind();
 	ModInstrument dummy;
 	ITInstrToMPT(file, dummy, instrumentHeader.trkvers);
+	SAMPLEINDEX nsamples = instrumentHeader.nos;
+	// Old SchismTracker versions set nos=0
+	for(size_t i = 0; i < CountOf(dummy.Keyboard); i++)
+	{
+		nsamples = std::max(nsamples, dummy.Keyboard[i]);
+	}
+	if(!nsamples)
+		return false;
+
+	// Preferrably read the middle-C sample
+	SAMPLEINDEX sample = dummy.Keyboard[NOTE_MIDDLEC - NOTE_MIN];
+	if(sample > 0 && sample <= instrumentHeader.nos)
+		sample--;
+	else
+		sample = 0;
+	file.Seek(file.GetPosition() + sample * sizeof(ITSample));
 	return ReadITSSample(nSample, file, false);
 }
 
@@ -1907,7 +1926,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 //--------------------------------------------------------------------------
 {
 	ITInstrument instrumentHeader;
-	SAMPLEINDEX smp = 0, nsamples;
+	SAMPLEINDEX smp = 0;
 
 	file.Rewind();
 	if(!file.ReadConvertEndianness(instrumentHeader)
@@ -1928,7 +1947,12 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	Instruments[nInstr] = pIns;
 	file.Rewind();
 	ITInstrToMPT(file, *pIns, instrumentHeader.trkvers);
-	nsamples = instrumentHeader.nos;
+	SAMPLEINDEX nsamples = instrumentHeader.nos;
+	// Old SchismTracker versions set nos=0
+	for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
+	{
+		nsamples = std::max(nsamples, pIns->Keyboard[i]);
+	}
 
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
@@ -1943,7 +1967,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(smp == SAMPLEINDEX_INVALID) break;
 		samplemap[i] = smp;
 		const FileReader::off_t offset = file.GetPosition();
-		ReadITSSample(smp, file, false);
+		if(!ReadITSSample(smp, file, false))
+			smp--;
 		extraOffset = std::max(extraOffset, file.GetPosition());
 		file.Seek(offset + sizeof(ITSample));
 	}
@@ -1975,18 +2000,18 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const
 //----------------------------------------------------------------------------------------------------------------------------------
 {
-	ITInstrumentEx iti;
+	ITInstrument iti;
 	ModInstrument *pIns = Instruments[nInstr];
 	FILE *f;
 
 	if((!pIns) || filename.empty()) return false;
-	if((f = mpt_fopen(filename, "wb")) == NULL) return false;
+	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
 
 	size_t instSize = iti.ConvertToIT(*pIns, false, *this);
 
 	// Create sample assignment table
 	std::vector<SAMPLEINDEX> smptable;
-	std::vector<SAMPLEINDEX> smpmap(GetNumSamples(), 0);
+	std::vector<uint8> smpmap(GetNumSamples(), 0);
 	for(size_t i = 0; i < NOTE_MAX; i++)
 	{
 		const SAMPLEINDEX smp = pIns->Keyboard[i];
@@ -1996,14 +2021,15 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 			{
 				// We haven't considered this sample yet.
 				smptable.push_back(smp);
-				smpmap[smp - 1] = static_cast<SAMPLEINDEX>(smptable.size());
+				smpmap[smp - 1] = static_cast<uint8>(smptable.size());
 			}
-			iti.iti.keyboard[i * 2 + 1] = static_cast<uint8>(smpmap[smp - 1]);
+			iti.keyboard[i * 2 + 1] = smpmap[smp - 1];
 		} else
 		{
-			iti.iti.keyboard[i * 2 + 1] = 0;
+			iti.keyboard[i * 2 + 1] = 0;
 		}
 	}
+	iti.nos = static_cast<uint8>(smptable.size());
 	smpmap.clear();
 
 	uint32 filePos = instSize;

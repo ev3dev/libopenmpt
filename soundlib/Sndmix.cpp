@@ -490,7 +490,6 @@ bool CSoundFile::ProcessRow()
 						visitedSongRows.Initialize(true);
 						return false;
 					}
-
 				} else
 				{
 					m_PlayState.m_nCurrentOrder++;
@@ -512,7 +511,8 @@ bool CSoundFile::ProcessRow()
 		}
 
 		// Weird stuff?
-		if (!Patterns.IsValidPat(m_PlayState.m_nPattern)) return false;
+		if (!Patterns.IsValidPat(m_PlayState.m_nPattern))
+			return false;
 		// Did we jump to an invalid row?
 		if (m_PlayState.m_nRow >= Patterns[m_PlayState.m_nPattern].GetNumRows()) m_PlayState.m_nRow = 0;
 
@@ -582,6 +582,8 @@ bool CSoundFile::ProcessRow()
 					if(Order.size() > m_PlayState.m_nCurrentOrder)
 						m_PlayState.m_nPattern = Order[m_PlayState.m_nCurrentOrder];
 					visitedSongRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow);
+					if (!Patterns.IsValidPat(m_PlayState.m_nPattern))
+						return false;
 				} else
 				{
 					visitedSongRows.Initialize(true);
@@ -773,11 +775,12 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 		if(vol > 0 || m_playBehaviour[kITVibratoTremoloPanbrello])
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
-			const int tremattn = ((GetType() & MOD_TYPE_XM) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
+			const uint8 tremattn = ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
 
 			int delta = GetVibratoDelta(pChn->nTremoloType, trempos);
-			if(GetType() == MOD_TYPE_DMF) delta -= 127;
-			vol += (delta * (int)pChn->nTremoloDepth) >> tremattn;
+			if(GetType() == MOD_TYPE_DMF)
+				delta -= 127;
+			vol += (delta * pChn->nTremoloDepth) / (1u << tremattn);
 		}
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
@@ -1834,6 +1837,8 @@ uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int peri
 		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo.GetRaw(), pIns->pitchToTempoLock.GetRaw());
 	}
 
+	// Avoid increment to overflow and become negative with unrealisticly high frequencies.
+	LimitMax(freq, uint32(int32_max));
 	return Util::muldivr(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 }
 
