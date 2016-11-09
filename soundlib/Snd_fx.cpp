@@ -296,7 +296,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		memory.state.m_nCurrentOrder = memory.state.m_nNextOrder;
 
 		if(memory.state.m_nCurrentOrder >= orderList.size())
+		{
+			memory.state.m_nCurrentOrder = orderList.GetRestartPos();
 			break;
+		}
 
 		// Check if pattern is valid
 		memory.state.m_nPattern = orderList[memory.state.m_nCurrentOrder];
@@ -348,6 +351,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 			}
 		}
+		if(memory.state.m_nNextOrder == ORDERINDEX_INVALID)
+		{
+			// GetFirstUnvisitedRow failed, so there is nothing more to play
+			break;
+		}
+
 		// Skip non-existing patterns
 		if((memory.state.m_nPattern >= Patterns.Size()) || (!Patterns[memory.state.m_nPattern]))
 		{
@@ -581,7 +590,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						}
 					}
 
-					TEMPO tempoMin = GetModSpecifications().tempoMin, tempoMax = GetModSpecifications().tempoMax;
+					TEMPO tempoMin = GetModSpecifications().GetTempoMin(), tempoMax = GetModSpecifications().GetTempoMax();
 					if(m_playBehaviour[kTempoClamp])	// clamp tempo correctly in compatible mode
 					{
 						tempoMax.Set(255);
@@ -2895,7 +2904,7 @@ bool CSoundFile::ProcessEffects()
 					if (param) pChn->nOldTempo = static_cast<ModCommand::PARAM>(param); else param = pChn->nOldTempo;
 				}
 				TEMPO t(param, 0);
-				LimitMax(t, GetModSpecifications().tempoMax);
+				LimitMax(t, GetModSpecifications().GetTempoMax());
 				SetTempo(t);
 			}
 			break;
@@ -5316,11 +5325,11 @@ void CSoundFile::SetTempo(TEMPO param, bool setAsNonModcommand)
 	if(setAsNonModcommand)
 	{
 		// Set tempo from UI - ignore slide commands and such.
-		m_PlayState.m_nMusicTempo = Clamp(param, specs.tempoMin, specs.tempoMax);
+		m_PlayState.m_nMusicTempo = Clamp(param, specs.GetTempoMin(), specs.GetTempoMax());
 	} else if (param >= minTempo && m_SongFlags[SONG_FIRSTTICK])
 	{
 		m_PlayState.m_nMusicTempo = param;
-		if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax;
+		if (param > GetModSpecifications().GetTempoMax()) param = GetModSpecifications().GetTempoMax();
 	} else if (param < minTempo && !m_SongFlags[SONG_FIRSTTICK])
 	{
 		// Tempo Slide
@@ -5330,7 +5339,7 @@ void CSoundFile::SetTempo(TEMPO param, bool setAsNonModcommand)
 		else
 			m_PlayState.m_nMusicTempo -= tempDiff;
 
-		TEMPO tempoMin = GetModSpecifications().tempoMin, tempoMax = GetModSpecifications().tempoMax;
+		TEMPO tempoMin = GetModSpecifications().GetTempoMin(), tempoMax = GetModSpecifications().GetTempoMax();
 		if(m_playBehaviour[kTempoClamp])	// clamp tempo correctly in compatible mode
 		{
 			tempoMax.Set(255);
