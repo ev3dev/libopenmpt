@@ -1,8 +1,16 @@
-libopenmpt (0.2.7299~beta20.2-1) UNRELEASED; urgency=medium
+libopenmpt (0.2.7299~beta20.2-1) unstable; urgency=medium
 
-  *
+  * New upstream release.
 
- -- James Cowgill <jcowgill@debian.org>  Wed, 09 Nov 2016 09:00:28 +0000
+  * debian/patches:
+    - Drop 01_openmpt123-whatis.patch - applied upstream.
+  * debian/rules:
+    - Use dh_autoreconf --as-needed.
+    - Install libopenmpt/dox/changelog.md as the upstream changelog.
+  * debian/tests:
+    - Add pkg-config to autopkgtest dependencies.
+
+ -- James Cowgill <jcowgill@debian.org>  Wed, 09 Nov 2016 15:55:27 +0000
 
 libopenmpt (0.2.7025~beta20.1-1) unstable; urgency=medium
 
