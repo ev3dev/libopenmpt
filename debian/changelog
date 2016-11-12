@@ -1,8 +1,14 @@
-libopenmpt (0.2.7299~beta20.2-2) UNRELEASED; urgency=medium
+libopenmpt (0.2.7299~beta20.2-2) unstable; urgency=medium
 
-  *
+  * debian/control:
+    - Add extra dependencies to libopenmpt-dev to satisfy pkg-config. Should
+      fix autopkgtest failures.
+  * debian/libopenmpt-dev.install:
+    - Drop static library.
+  * debian/watch:
+    - Remove hyphen before @ANY_VERSION@ in watch file.
 
- -- James Cowgill <jcowgill@debian.org>  Wed, 09 Nov 2016 22:22:49 +0000
+ -- James Cowgill <jcowgill@debian.org>  Sat, 12 Nov 2016 15:31:14 +0000
 
 libopenmpt (0.2.7299~beta20.2-1) unstable; urgency=medium
 
