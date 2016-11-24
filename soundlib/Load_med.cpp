@@ -293,11 +293,11 @@ STATIC_ASSERT(sizeof(MMD0EXP) == 80);
 
 
 
+static const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
+
 static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 //---------------------------------------------------------------
 {
-	const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
-
 	ModCommand::COMMAND command = p->command;
 	uint32 param = p->param;
 	switch(command)
@@ -338,7 +338,7 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 		{
 			if (pmsh->flags & MMD_FLAG_8CHANNEL)
 			{
-				param = (param >= 10) ? 99 : bpmvals[param-1];
+				param = (param == 0 || param >= 10) ? 99 : bpmvals[param-1];
 			} else
 			// F.01 - F.0A: Set Speed
 			if (param <= 0x0A)
@@ -636,7 +636,10 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	#endif
 	} else
 	{
-		deftempo = Util::muldiv(deftempo, 5*715909, 2*474326);
+		if((pmsh->flags & MMD_FLAG_8CHANNEL) && deftempo > 0 && deftempo <= 9)
+			deftempo = bpmvals[deftempo-1];
+		else
+			deftempo = Util::muldiv(deftempo, 5 * 715909, 2 * 474326);
 	#ifdef MED_LOG
 		Log("oldtempo: %3d bpm (bpm=%3d)\n", deftempo, BigEndianW(pmsh->deftempo));
 	#endif
@@ -779,7 +782,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 				uint32 trktagofs = BigEndian(ptrktags[i]);
 				if (trktagofs && (trktagofs <= dwMemLength - 8) )
 				{
-					while (trktagofs+8 < dwMemLength)
+					while (trktagofs < dwMemLength - 8)
 					{
 						uint32 ntag = BigEndian(*const_unaligned_ptr_le<uint32>(lpStream + trktagofs));
 						if (ntag == MMDTAG_END) break;
