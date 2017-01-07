@@ -76,3 +76,31 @@ Description: module music library based on OpenMPT -- documentation
  .
  This package contains documentation for developing programs which use
  libopenmpt.
+
+Package: libopenmpt-modplug1
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: module music library based on OpenMPT -- modplug compat library
+ libopenmpt is a cross-platform C++ and C library to decode tracked music
+ files (modules) into a raw PCM audio stream. It is based on the player code
+ of the OpenMPT project, a descendant of the original ModPlug Tracker.
+ .
+ This package contains the modplug compatibility shared library. It is used by
+ programs that want to use libopenmpt's decoder, but are written using
+ libmodplug's API.
+
+Package: libopenmpt-modplug-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libopenmpt-modplug1 (= ${binary:Version}), ${misc:Depends}
+Conflicts: libmodplug-dev
+Description: module music library based on OpenMPT -- modplug compat development files
+ libopenmpt is a cross-platform C++ and C library to decode tracked music
+ files (modules) into a raw PCM audio stream. It is based on the player code
+ of the OpenMPT project, a descendant of the original ModPlug Tracker.
+ .
+ This package contains the development files required to compile programs
+ using libopenmpt's modplug compatibility layer. It serves as an alternative
+ to the libmodplug-dev package.
