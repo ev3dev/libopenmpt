@@ -1,2 +1,11 @@
+# Main build tests
 Tests: build
 Depends: gcc, g++, libopenmpt-dev, pkg-config
+
+# Test modplug compatability layer
+Tests: build-modplug
+Depends: gcc, libopenmpt-modplug-dev, pkg-config
+
+# Control - identical code should work with old modplug
+Tests: build-modplug
+Depends: gcc, libmodplug-dev, pkg-config
