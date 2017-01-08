@@ -1,8 +1,18 @@
-libopenmpt (0.2.7386~beta20.3-2) UNRELEASED; urgency=medium
+libopenmpt (0.2.7386~beta20.3-2) unstable; urgency=medium
 
-  *
+  * Enable libmodplug compatibility layer.
+    - Add libopenmpt-modplug-dev and libopenmpt-modplug1.
+    - Add autopkgtest for libmodplug compat layer.
+    - Add ELF symbol versioning to all the symbols exported by the
+      compatibility layer.
 
- -- James Cowgill <jcowgill@debian.org>  Fri, 06 Jan 2017 18:17:33 +0000
+  * debian/control:
+    - Build-Conflicts against autoconf-archive.
+    - Drop "decoding" from the short description to make more room.
+  * debian/rules:
+    - Disable static library in configure invocation.
+
+ -- James Cowgill <jcowgill@debian.org>  Sun, 08 Jan 2017 10:38:40 +0000
 
 libopenmpt (0.2.7386~beta20.3-1) unstable; urgency=medium
 
