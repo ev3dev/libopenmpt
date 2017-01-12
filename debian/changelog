@@ -1,8 +1,10 @@
-libopenmpt (0.2.7386~beta20.3-3) UNRELEASED; urgency=medium
+libopenmpt (0.2.7386~beta20.3-3) unstable; urgency=medium
 
-  *
+  * debian/tests:
+    - Depend on build-essential in all autopkgtests. This should fix the
+      recent autopkgtest failures.
 
- -- James Cowgill <jcowgill@debian.org>  Thu, 12 Jan 2017 17:01:35 +0000
+ -- James Cowgill <jcowgill@debian.org>  Thu, 12 Jan 2017 17:17:13 +0000
 
 libopenmpt (0.2.7386~beta20.3-2) unstable; urgency=medium
 
