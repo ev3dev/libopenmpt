@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.2.7386-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.2.7561-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -21,8 +21,8 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 
 AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/branches/1.26-maintenance"], [svn version])
-AC_DEFINE([MPT_SVNVERSION], ["7386"], [svn version])
-AC_DEFINE([MPT_SVNDATE], ["2016-11-20T16:45:27.412655Z"], [svn date])
+AC_DEFINE([MPT_SVNVERSION], ["7561"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["2017-02-05T16:23:49.365208Z"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [true], [is package])
 
 LIBOPENMPT_REQUIRES_PRIVATE=
