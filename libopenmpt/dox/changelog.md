@@ -5,6 +5,22 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta20.5 (2017-02-05)
+
+ *  [**Bug**] libmodplug: C++ API did not build with MSVC2008 in 0.2-beta20.4.
+
+### libopenmpt 0.2-beta20.4 (2017-02-05, not released)
+
+ *  [**Bug**] Possible hangs with malformed files containing cyclic plugin
+    routings.
+
+ *  libmodplug: Added all missing C++ API symbols that are accessable via the
+    public libmodplug header file.
+ *  Channel frequency could wrap around after some excessive portamento / down
+    in some formats since libopenmpt 0.2-beta17.
+ *  Playback improvements for S3M files made with Impulse Tracker and
+    Schism Tracker.
+
 ### libopenmpt 0.2-beta20.3 (2016-11-20)
 
  *  [**Bug**] Possible crashes with malformed ITP and MED files.
