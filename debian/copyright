@@ -4,12 +4,12 @@ Source: https://lib.openmpt.org/libopenmpt/
 
 Files: *
 Copyright:
- 2004-2016 OpenMPT contributors
+ 2004-2017 OpenMPT contributors
  1997-2003 Olivier Lapicque
 License: BSD-3-clause
 
 Files: debian/*
-Copyright: 2016 James Cowgill <jcowgill@debian.org>
+Copyright: 2016-2017 James Cowgill <jcowgill@debian.org>
 License: BSD-3-clause
 
 Files:
