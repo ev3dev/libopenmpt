@@ -1,8 +1,15 @@
-libopenmpt (0.2.7561~beta20.5-1) UNRELEASED; urgency=medium
+libopenmpt (0.2.7561~beta20.5-1) experimental; urgency=medium
 
-  *
+  * New upstream release.
 
- -- James Cowgill <jcowgill@debian.org>  Thu, 09 Feb 2017 14:28:28 +0000
+  * debian/copyright:
+    - Update dates.
+  * debian/patches, debian/libopenmpt-modplug1.symbols:
+    - Track modplug symbols in a debian symbols file instead of the ELF symbol
+      versioning file.
+    - Add new modplug symbols from 0.2.7561~beta20.5.
+
+ -- James Cowgill <jcowgill@debian.org>  Fri, 10 Feb 2017 11:44:43 +0000
 
 libopenmpt (0.2.7386~beta20.3-3) unstable; urgency=medium
 
