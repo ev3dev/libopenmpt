@@ -14,10 +14,20 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
+#if defined(MODPLUG_TRACKER)
+#include <shlwapi.h>
+#endif
 #endif
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#if MPT_OS_WINDOWS
+#define MPT_PATHSTRING_LITERAL(x) ( L ## x )
+#else
+#define MPT_PATHSTRING_LITERAL(x) ( x )
+#endif
 
 
 #if MPT_OS_WINDOWS
@@ -57,23 +67,93 @@ int PathString::CompareNoCase(const PathString & a, const PathString & b)
 
 #endif // MPT_OS_WINDOWS
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 namespace mpt
 {
 
+
+#if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
+
 void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
 //------------------------------------------------------------------------------------------------------
 {
-	wchar_t tempDrive[_MAX_DRIVE];
-	wchar_t tempDir[_MAX_DIR];
-	wchar_t tempFname[_MAX_FNAME];
-	wchar_t tempExt[_MAX_EXT];
-	_wsplitpath(path.c_str(), tempDrive, tempDir, tempFname, tempExt);
-	if(drive) *drive = mpt::PathString::FromNative(tempDrive);
-	if(dir) *dir = mpt::PathString::FromNative(tempDir);
-	if(fname) *fname = mpt::PathString::FromNative(tempFname);
-	if(ext) *ext = mpt::PathString::FromNative(tempExt);
+	// We cannot use CRT splitpath here, because:
+	//  * limited to _MAX_PATH or similar
+	//  * no support for UNC paths
+	//  * no support for \\?\ prefixed paths
+
+	if(drive) *drive = mpt::PathString();
+	if(dir) *dir = mpt::PathString();
+	if(fname) *fname = mpt::PathString();
+	if(ext) *ext = mpt::PathString();
+
+	mpt::RawPathString p = path;
+
+	// remove \\?\\ prefix
+	if(p.substr(0, 8) == MPT_PATHSTRING_LITERAL("\\\\?\\UNC\\"))
+	{
+		p = MPT_PATHSTRING_LITERAL("\\\\") + p.substr(8);
+	} else if(p.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
+	{
+		p = p.substr(4);
+	}
+
+	if (p.length() >= 2 && (
+		p.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\")
+		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\/")
+		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("/\\")
+		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("//")
+		))
+	{ // UNC
+		mpt::RawPathString::size_type first_slash = p.substr(2).find_first_of(MPT_PATHSTRING_LITERAL("\\/"));
+		if(first_slash != mpt::RawPathString::npos)
+		{
+			mpt::RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(MPT_PATHSTRING_LITERAL("\\/"));
+			if(second_slash != mpt::RawPathString::npos)
+			{
+				if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2 + first_slash + 1 + second_slash));
+				p = p.substr(2 + first_slash + 1 + second_slash);
+			} else
+			{
+				if(drive) *drive = mpt::PathString::FromNative(p);
+				p = mpt::RawPathString();
+			}
+		} else
+		{
+			if(drive) *drive = mpt::PathString::FromNative(p);
+			p = mpt::RawPathString();
+		}
+	} else
+	{ // local
+		if(p.length() >= 2 && (p[1] == MPT_PATHSTRING_LITERAL(':')))
+		{
+			if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2));
+			p = p.substr(2);
+		} else
+		{
+			if(drive) *drive = mpt::PathString();
+		}
+	}
+	mpt::RawPathString::size_type last_slash = p.find_last_of(MPT_PATHSTRING_LITERAL("\\/"));
+	if(last_slash != mpt::RawPathString::npos)
+	{
+		if(dir) *dir = mpt::PathString::FromNative(p.substr(0, last_slash + 1));
+		p = p.substr(last_slash + 1);
+	} else
+	{
+		if(dir) *dir = mpt::PathString();
+	}
+	mpt::RawPathString::size_type last_dot = p.find_last_of(MPT_PATHSTRING_LITERAL("."));
+	if(last_dot == mpt::RawPathString::npos)
+	{
+		if(fname) *fname = mpt::PathString::FromNative(p);
+		if(ext) *ext = mpt::PathString();
+	} else
+	{
+		if(fname) *fname = mpt::PathString::FromNative(p.substr(0, last_dot));
+		if(ext) *ext = mpt::PathString::FromNative(p.substr(last_dot));
+	}
+
 }
 
 PathString PathString::GetDrive() const
@@ -119,6 +199,38 @@ PathString PathString::GetFullFileName() const
 	return name + ext;
 }
 
+
+bool PathString::IsDirectory() const
+//----------------------------------
+{
+	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
+	// GetFileAttributesW also does the job just fine.
+	DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+bool PathString::IsFile() const
+//-----------------------------
+{
+	DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+#endif // MPT_OS_WINDOWS && MPT_ENABLE_DYNBIND
+
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+bool PathString::FileOrDirectoryExists() const
+//--------------------------------------------
+{
+	return ::PathFileExistsW(path.c_str()) != FALSE;
+}
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
 //--------------------------------------------------------------------
@@ -183,7 +295,6 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 }
 
 
-#if MPT_OS_WINDOWS
 #if defined(_MFC_VER)
 
 mpt::PathString PathString::TunnelOutofCString(const CString &path)
@@ -220,15 +331,50 @@ CString PathString::TunnelIntoCString(const mpt::PathString &path)
 }
 
 #endif // MFC
-#endif // MPT_OS_WINDOWS
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 } // namespace mpt
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 namespace mpt
 {
+
+
+bool IsPathSeparator(mpt::RawPathString::value_type c) {
+#if MPT_OS_WINDOWS
+	return (c == MPT_PATHSTRING_LITERAL('\\')) || (c == MPT_PATHSTRING_LITERAL('/'));
+#else
+	return c == MPT_PATHSTRING_LITERAL('/');
+#endif
+}
+
+bool PathIsAbsolute(const mpt::PathString &path) {
+	mpt::RawPathString rawpath = path.AsNative();
+#if MPT_OS_WINDOWS
+	if(rawpath.substr(0, 8) == MPT_PATHSTRING_LITERAL("\\\\?\\UNC\\"))
+	{
+		return true;
+	}
+	if(rawpath.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
+	{
+		return true;
+	}
+	if(rawpath.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
+	{
+		return true; // UNC
+	}
+	if(rawpath.substr(0, 2) == MPT_PATHSTRING_LITERAL("//"))
+	{
+		return true; // UNC
+	}
+	return (rawpath.length()) >= 3 && (rawpath[1] == ':') && IsPathSeparator(rawpath[2]);
+#else
+	return (rawpath.length() >= 1) && IsPathSeparator(rawpath[0]);
+#endif
+}
+
 
 #if MPT_OS_WINDOWS
 

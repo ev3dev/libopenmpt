@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.2.7561-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.2.7774-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -20,10 +20,34 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
 
-AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/branches/1.26-maintenance"], [svn version])
-AC_DEFINE([MPT_SVNVERSION], ["7561"], [svn version])
-AC_DEFINE([MPT_SVNDATE], ["2017-02-05T16:23:49.365208Z"], [svn date])
+AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26"], [svn version])
+AC_DEFINE([MPT_SVNVERSION], ["7774"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["2017-03-11T12:09:52.920849Z"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [true], [is package])
+
+
+AC_CANONICAL_HOST
+case $host_os in
+ mingw32*)
+  LIBOPENMPT_WIN32_LIBS=-lrpcrt4
+  OPENMPT123_WIN32_LIBS=-lwinmm
+  CXXFLAGS="$CXXFLAGS -municode"
+  CFLAGS="$CFLAGS -municode"
+  WIN32_CONSOLE_CXXFLAGS=-mconsole
+  WIN32_CONSOLE_CFLAGS=-mconsole
+  ;;
+ *)
+  LIBOPENMPT_WIN32_LIBS=
+  OPENMPT123_WIN32_LIBS=
+  WIN32_CONSOLE_CXXFLAGS=
+  WIN32_CONSOLE_CFLAGS=
+  ;;
+esac
+AC_SUBST([LIBOPENMPT_WIN32_LIBS])
+AC_SUBST([OPENMPT123_WIN32_LIBS])
+AC_SUBST([WIN32_CONSOLE_CXXFLAGS])
+AC_SUBST([WIN32_CONSOLE_CFLAGS])
+
 
 LIBOPENMPT_REQUIRES_PRIVATE=
 LIBOPENMPT_LIBS_PRIVATE=
@@ -93,9 +117,16 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
  ]
 )
 
+AC_ARG_ENABLE([dlopen], AS_HELP_STRING([--enable-dlopen], [Enable dynamic loading of 3rd-party libraries using dlopen or LoadLibray.]))
+AS_IF([test "x$enable-dlopen" = "xyes"],
+ [
+  AC_DEFINE([MPT_ENABLE_DLOPEN], [], [enable dlopen])
+ ]
+)
+  
 # Optional libopenmpt dependency: libltdl
-AC_ARG_WITH([ltdl], AS_HELP_STRING([--without-ltdl], [Disable the use of libtool libltdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_ltdl" != "xno"],
+AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl], [Enable the use of libtool libltdl for dynamic loading of third party libraries.]))
+AS_IF([test "x$with_ltdl" = "xyes"],
  [
   AC_CHECK_HEADER([ltdl.h],
    [
@@ -136,8 +167,8 @@ AC_SUBST([LTDL_CPPFLAGS])
 AC_SUBST([LTDL_LIBS])
 
 # Optional libopenmpt dependency: libdl
-AC_ARG_WITH([dl], AS_HELP_STRING([--without-dl], [Disable the use of libdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_dl" != "xno"],
+AC_ARG_WITH([dl], AS_HELP_STRING([--with-dl], [Enable the use of libdl for dynamic loading of third party libraries.]))
+AS_IF([test "x$with_dl" = "xyes"],
  [
   AC_SEARCH_LIBS([dlopen], [dl dld],
    [
@@ -177,8 +208,24 @@ AC_SUBST([LIBOPENMPT_REQUIRES_PRIVATE])
 AC_SUBST([LIBOPENMPT_LIBS_PRIVATE])
 
 
+# openmpt123
+AC_ARG_ENABLE([openmpt123], AS_HELP_STRING([--disable-openmpt123], [Disable the openmpt123 command line player.]))
+AM_CONDITIONAL([ENABLE_OPENMPT123], [test "x$enable_openmpt123" != "xno"])
+
+
+# examples
+AC_ARG_ENABLE([examples], AS_HELP_STRING([--disable-examples], [Disable the example programs.]))
+AM_CONDITIONAL([ENABLE_EXAMPLES], [test "x$enable_examples" != "xno"])
+
+
+# tests
+AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests], [Disable the test suite.]))
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
+
+
 # Optional openmpt123 dependency
 AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--without-pulseaudio], [Disable use of libpulse and libpulse-simple.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_pulseaudio" != "xno"],
  [
   PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
@@ -196,9 +243,11 @@ AS_IF([test "x$with_pulseaudio" != "xno"],
   have_pulseaudio=0
  ]
 )
+],[have_pulseaudio=0])
 
 # Optional openmpt123 and examples dependency
 AC_ARG_WITH([portaudio], AS_HELP_STRING([--without-portaudio], [Disable use of libportaudio.]))
+AS_IF([test "x$enable_openmpt123$enable_examples" != "xnono"],[
 AS_IF([test "x$with_portaudio" != "xno"],
  [
   PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
@@ -216,10 +265,12 @@ AS_IF([test "x$with_portaudio" != "xno"],
   have_portaudio=0
  ]
 )
+],[have_portaudio=0])
 AM_CONDITIONAL([HAVE_PORTAUDIO], [test x$have_portaudio = x1])
 
 # Optional examples dependency: PortAudio C++
 AC_ARG_WITH([portaudiocpp], AS_HELP_STRING([--without-portaudiocpp], [Disable use of libportaudiocpp.]))
+AS_IF([test "x$enable_examples" != "xno"],[
 AS_IF([test "x$with_portaudiocpp" != "xno"],
  [
   PKG_CHECK_MODULES([PORTAUDIOCPP], [portaudiocpp],
@@ -237,39 +288,48 @@ AS_IF([test "x$with_portaudiocpp" != "xno"],
   have_portaudiocpp=0
  ]
 )
+],[have_portaudicppo=0])
 AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudio = x1])
 
 # Optional disabled openmpt123 dependency: libsdl2
 AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sdl2" = "xyes"],
  [
   PKG_CHECK_MODULES([SDL2], [sdl2], [AC_DEFINE([MPT_WITH_SDL2], [], [with libsdl2])], [AC_MSG_ERROR([Unable to find libsdl2.])])
  ]
 )
+])
 
 # Optional disabled openmpt123 dependency: libsdl
 AC_ARG_WITH([sdl], AS_HELP_STRING([--with-sdl], [Enable use of libsdl.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sdl" = "xyes"],
  [
   PKG_CHECK_MODULES([SDL], [sdl], [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])], [AC_MSG_ERROR([Unable to find libsdl.])])
  ]
 )
+])
 
 # Optional openmpt123 dependency: libsndfile
 AC_ARG_WITH([sndfile], AS_HELP_STRING([--without-sndfile], [Disable use of libsndfile.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sndfile" != "xno"],
  [
   PKG_CHECK_MODULES([SNDFILE], [sndfile], [AC_DEFINE([MPT_WITH_SNDFILE], [], [with libsndfile])], [AC_MSG_ERROR([Unable to find libsndfile.])])
  ]
 )
+])
 
 # Optional openmpt123 dependency: libFLAC
 AC_ARG_WITH([flac], AS_HELP_STRING([--without-flac], [Disable use of libflac.]))
+AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_flac" != "xno"],
  [
   PKG_CHECK_MODULES([FLAC], [flac >= 1.3.0], [AC_DEFINE([MPT_WITH_FLAC], [], [with libflac])], [AC_MSG_ERROR([Unable to find libflac >= 1.3.0.])])
  ]
 )
+])
 
 # We want a modern C compiler 
 AC_PROG_CC_STDC

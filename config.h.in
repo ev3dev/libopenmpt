@@ -37,6 +37,9 @@
    */
 #undef LT_OBJDIR
 
+/* enable dlopen */
+#undef MPT_ENABLE_DLOPEN
+
 /* is package */
 #undef MPT_PACKAGE
 

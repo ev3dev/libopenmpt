@@ -2199,10 +2199,11 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 	DestroySampleThreadsafe(nSample);
 	// Default values
+	const uint8 bytesPerSample = memcmp(fileHeader.magic, "8SVX", 4) ? 2 : 1;
 	ModSample &sample = Samples[nSample];
 	sample.Initialize();
-	sample.nLoopStart = sampleHeader.oneShotHiSamples;
-	sample.nLoopEnd = sample.nLoopStart + sampleHeader.repeatHiSamples;
+	sample.nLoopStart = sampleHeader.oneShotHiSamples / bytesPerSample;
+	sample.nLoopEnd = sample.nLoopStart + sampleHeader.repeatHiSamples / bytesPerSample;
 	sample.nC5Speed = sampleHeader.samplesPerSec;
 	sample.nVolume = static_cast<uint16>(sampleHeader.volume >> 8);
 	if(!sample.nVolume || sample.nVolume > 256) sample.nVolume = 256;
@@ -2219,13 +2220,14 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		strcpy(m_szNames[nSample], "");
 	}
 
-	sample.nLength = mpt::saturate_cast<SmpLength>(bodyChunk.GetLength());
+	sample.nLength = mpt::saturate_cast<SmpLength>(bodyChunk.GetLength() / bytesPerSample);
 	if((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength)) sample.uFlags.set(CHN_LOOP);
 
+	// While this is an Amiga format, the 16SV version appears to be only used on PC, and only with little-endian sample data.
 	SampleIO(
-		memcmp(fileHeader.magic, "8SVX", 4) ? SampleIO::_16bit : SampleIO::_8bit,
+		(bytesPerSample == 2) ? SampleIO::_16bit : SampleIO::_8bit,
 		SampleIO::mono,
-		SampleIO::bigEndian,
+		SampleIO::littleEndian,
 		SampleIO::signedPCM)
 		.ReadSample(sample, bodyChunk);
 	sample.PrecomputeLoops(*this, false);
@@ -3344,6 +3346,17 @@ class ComponentMPG123
 #endif
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
+
+private:
+
+#if MPT_OS_WINDOWS
+#if defined(MPT_WITH_MPG123)
+#elif defined(MPT_ENABLE_MPG123_DYNBIND)
+	mpt::Library MSVCRT;
+	mpt::Library LIBGCC;
+#endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND
+#endif // MPT_OS_WINDOWS
+
 public:
 
 	int (*mpg123_init )(void);
@@ -3455,10 +3468,43 @@ public:
 		MPT_GLOBAL_BIND("mpg123", mpg123_scan);
 		MPT_GLOBAL_BIND("mpg123", mpg123_length);
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
-		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
-		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123")));
-		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
-		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123")));
+		#if MPT_OS_WINDOWS
+			// preload MSVCRT.DLL in order to prevent DLL preloading injection attacks from the current working directory,
+			// because the stock binary packages of libmpg123 link against it
+			MSVCRT = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("MSVCRT")));
+			#if defined(LIBOPENMPT_BUILD)
+				// require successful dependency loading for libopenmpt
+				if(!MSVCRT.IsValid())
+				{
+					return false;
+				}
+			#endif // LIBOPENMPT_BUILD
+			// preload libgcc_s_sjlj-1.dll for the same reasons (32bit only, 64bit libmpg123 does not require it)
+			MPT_CONSTANT_IF(sizeof(void*) == 4)
+			{
+				if(!LIBGCC.IsValid()) LIBGCC = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libgcc_s_sjlj-1")));
+				#if defined(LIBOPENMPT_BUILD)
+					// require successful dependency loading for libopenmpt
+					if(!LIBGCC.IsValid())
+					{
+						return false;
+					}
+				#endif // LIBOPENMPT_BUILD
+			}
+		#endif // MPT_OS_WINDOWS
+		#if defined(MODPLUG_TRACKER)
+			AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
+			AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123")));
+			AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
+			AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123")));
+		#elif defined(LIBOPENMPT_BUILD)
+			#if MPT_OS_WINDOWS
+				// libopenmpt on Windows only loads the official builds
+				AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
+			#else // !MPT_OS_WINDOWS
+				AddLibrary("mpg123", mpt::LibraryPath::System(MPT_PATHSTRING("mpg123")));
+			#endif // MPT_OS_WINDOWS
+		#endif
 		MPT_COMPONENT_BIND("mpg123", mpg123_init);
 		MPT_COMPONENT_BIND("mpg123", mpg123_exit);
 		MPT_COMPONENT_BIND("mpg123", mpg123_new);

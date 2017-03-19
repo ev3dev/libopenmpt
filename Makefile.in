@@ -81,19 +81,22 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = openmpt123$(EXEEXT)
-check_PROGRAMS = libopenmpt_example_c_stdout$(EXEEXT) \
-	libopenmpt_example_c_probe$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2) libopenmpttest$(EXEEXT)
-TESTS = libopenmpttest$(EXEEXT)
-@HAVE_PORTAUDIO_TRUE@am__append_1 = libopenmpt_example_c \
-@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_mem \
-@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_unsafe
-@HAVE_PORTAUDIOCPP_TRUE@am__append_2 = libopenmpt_example_cxx
-@ENABLE_LIBOPENMPT_MODPLUG_TRUE@am__append_3 = libopenmpt_modplug.la
-@ENABLE_LIBMODPLUG_TRUE@am__append_4 = libmodplug/libmodplug.pc
-@ENABLE_LIBMODPLUG_TRUE@am__append_5 = libmodplug.la
-@ENABLE_LIBMODPLUG_TRUE@am__append_6 = libmodplug/modplug.h libmodplug/sndfile.h libmodplug/stdafx.h
+bin_PROGRAMS = $(am__EXEEXT_1)
+check_PROGRAMS = $(am__EXEEXT_2) $(am__EXEEXT_3) $(am__EXEEXT_4) \
+	$(am__EXEEXT_5)
+@ENABLE_TESTS_TRUE@TESTS = libopenmpttest$(EXEEXT)
+@ENABLE_EXAMPLES_TRUE@am__append_1 = libopenmpt_example_c_stdout \
+@ENABLE_EXAMPLES_TRUE@	libopenmpt_example_c_probe
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@am__append_2 = libopenmpt_example_c \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_mem \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_unsafe
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@am__append_3 = libopenmpt_example_cxx
+@ENABLE_LIBOPENMPT_MODPLUG_TRUE@am__append_4 = libopenmpt_modplug.la
+@ENABLE_LIBMODPLUG_TRUE@am__append_5 = libmodplug/libmodplug.pc
+@ENABLE_LIBMODPLUG_TRUE@am__append_6 = libmodplug.la
+@ENABLE_LIBMODPLUG_TRUE@am__append_7 = libmodplug/modplug.h libmodplug/sndfile.h libmodplug/stdafx.h
+@ENABLE_TESTS_TRUE@am__append_8 = libopenmpttest
+@ENABLE_OPENMPT123_TRUE@am__append_9 = openmpt123
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
@@ -185,7 +188,8 @@ am__DEPENDENCIES_1 =
 libopenmpt_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_libopenmpt_la_OBJECTS = common/libopenmpt_la-ComponentManager.lo \
 	common/libopenmpt_la-FileReader.lo \
 	common/libopenmpt_la-Logging.lo \
@@ -314,176 +318,337 @@ libopenmpt_modplug_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(libopenmpt_modplug_la_LDFLAGS) $(LDFLAGS) -o $@
 @ENABLE_LIBOPENMPT_MODPLUG_TRUE@am_libopenmpt_modplug_la_rpath =  \
 @ENABLE_LIBOPENMPT_MODPLUG_TRUE@	-rpath $(libdir)
-@HAVE_PORTAUDIO_TRUE@am__EXEEXT_1 = libopenmpt_example_c$(EXEEXT) \
-@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_mem$(EXEEXT) \
-@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_unsafe$(EXEEXT)
-@HAVE_PORTAUDIOCPP_TRUE@am__EXEEXT_2 =  \
-@HAVE_PORTAUDIOCPP_TRUE@	libopenmpt_example_cxx$(EXEEXT)
+@ENABLE_OPENMPT123_TRUE@am__EXEEXT_1 = openmpt123$(EXEEXT)
+@ENABLE_EXAMPLES_TRUE@am__EXEEXT_2 =  \
+@ENABLE_EXAMPLES_TRUE@	libopenmpt_example_c_stdout$(EXEEXT) \
+@ENABLE_EXAMPLES_TRUE@	libopenmpt_example_c_probe$(EXEEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@am__EXEEXT_3 = libopenmpt_example_c$(EXEEXT) \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_mem$(EXEEXT) \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	libopenmpt_example_c_unsafe$(EXEEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@am__EXEEXT_4 = libopenmpt_example_cxx$(EXEEXT)
+@ENABLE_TESTS_TRUE@am__EXEEXT_5 = libopenmpttest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 am__libopenmpt_example_c_SOURCES_DIST =  \
 	examples/libopenmpt_example_c.c
-@HAVE_PORTAUDIO_TRUE@am_libopenmpt_example_c_OBJECTS = examples/libopenmpt_example_c-libopenmpt_example_c.$(OBJEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@am_libopenmpt_example_c_OBJECTS = examples/libopenmpt_example_c-libopenmpt_example_c.$(OBJEXT)
 libopenmpt_example_c_OBJECTS = $(am_libopenmpt_example_c_OBJECTS)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_DEPENDENCIES =  \
-@HAVE_PORTAUDIO_TRUE@	$(lib_LTLIBRARIES) $(am__DEPENDENCIES_1)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_DEPENDENCIES =  \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	$(lib_LTLIBRARIES) \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	$(am__DEPENDENCIES_1)
+libopenmpt_example_c_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libopenmpt_example_c_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am__libopenmpt_example_c_mem_SOURCES_DIST =  \
 	examples/libopenmpt_example_c_mem.c
-@HAVE_PORTAUDIO_TRUE@am_libopenmpt_example_c_mem_OBJECTS = examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.$(OBJEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@am_libopenmpt_example_c_mem_OBJECTS = examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.$(OBJEXT)
 libopenmpt_example_c_mem_OBJECTS =  \
 	$(am_libopenmpt_example_c_mem_OBJECTS)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_DEPENDENCIES =  \
-@HAVE_PORTAUDIO_TRUE@	$(lib_LTLIBRARIES) $(am__DEPENDENCIES_1)
-am_libopenmpt_example_c_probe_OBJECTS = examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.$(OBJEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_DEPENDENCIES =  \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	$(lib_LTLIBRARIES) \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	$(am__DEPENDENCIES_1)
+libopenmpt_example_c_mem_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libopenmpt_example_c_mem_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am__libopenmpt_example_c_probe_SOURCES_DIST =  \
+	examples/libopenmpt_example_c_probe.c
+@ENABLE_EXAMPLES_TRUE@am_libopenmpt_example_c_probe_OBJECTS = examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.$(OBJEXT)
 libopenmpt_example_c_probe_OBJECTS =  \
 	$(am_libopenmpt_example_c_probe_OBJECTS)
-libopenmpt_example_c_probe_DEPENDENCIES = $(lib_LTLIBRARIES)
-am_libopenmpt_example_c_stdout_OBJECTS = examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.$(OBJEXT)
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_probe_DEPENDENCIES =  \
+@ENABLE_EXAMPLES_TRUE@	$(lib_LTLIBRARIES)
+libopenmpt_example_c_probe_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libopenmpt_example_c_probe_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am__libopenmpt_example_c_stdout_SOURCES_DIST =  \
+	examples/libopenmpt_example_c_stdout.c
+@ENABLE_EXAMPLES_TRUE@am_libopenmpt_example_c_stdout_OBJECTS = examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.$(OBJEXT)
 libopenmpt_example_c_stdout_OBJECTS =  \
 	$(am_libopenmpt_example_c_stdout_OBJECTS)
-libopenmpt_example_c_stdout_DEPENDENCIES = $(lib_LTLIBRARIES)
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_stdout_DEPENDENCIES =  \
+@ENABLE_EXAMPLES_TRUE@	$(lib_LTLIBRARIES)
+libopenmpt_example_c_stdout_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libopenmpt_example_c_stdout_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am__libopenmpt_example_c_unsafe_SOURCES_DIST =  \
 	examples/libopenmpt_example_c_unsafe.c
-@HAVE_PORTAUDIO_TRUE@am_libopenmpt_example_c_unsafe_OBJECTS = examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.$(OBJEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@am_libopenmpt_example_c_unsafe_OBJECTS = examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.$(OBJEXT)
 libopenmpt_example_c_unsafe_OBJECTS =  \
 	$(am_libopenmpt_example_c_unsafe_OBJECTS)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_DEPENDENCIES =  \
-@HAVE_PORTAUDIO_TRUE@	$(lib_LTLIBRARIES) $(am__DEPENDENCIES_1)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_DEPENDENCIES =  \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	$(lib_LTLIBRARIES) \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@	$(am__DEPENDENCIES_1)
+libopenmpt_example_c_unsafe_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libopenmpt_example_c_unsafe_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am__libopenmpt_example_cxx_SOURCES_DIST =  \
 	examples/libopenmpt_example_cxx.cpp
-@HAVE_PORTAUDIOCPP_TRUE@am_libopenmpt_example_cxx_OBJECTS = examples/libopenmpt_example_cxx-libopenmpt_example_cxx.$(OBJEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@am_libopenmpt_example_cxx_OBJECTS = examples/libopenmpt_example_cxx-libopenmpt_example_cxx.$(OBJEXT)
 libopenmpt_example_cxx_OBJECTS = $(am_libopenmpt_example_cxx_OBJECTS)
-@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_DEPENDENCIES =  \
-@HAVE_PORTAUDIOCPP_TRUE@	$(lib_LTLIBRARIES) \
-@HAVE_PORTAUDIOCPP_TRUE@	$(am__DEPENDENCIES_1)
-am_libopenmpttest_OBJECTS =  \
-	libopenmpt/libopenmpttest-libopenmpt_test.$(OBJEXT) \
-	test/libopenmpttest-test.$(OBJEXT) \
-	test/libopenmpttest-TestToolsLib.$(OBJEXT) \
-	common/libopenmpttest-ComponentManager.$(OBJEXT) \
-	common/libopenmpttest-FileReader.$(OBJEXT) \
-	common/libopenmpttest-Logging.$(OBJEXT) \
-	common/libopenmpttest-misc_util.$(OBJEXT) \
-	common/libopenmpttest-mptCPU.$(OBJEXT) \
-	common/libopenmpttest-mptFileIO.$(OBJEXT) \
-	common/libopenmpttest-mptIO.$(OBJEXT) \
-	common/libopenmpttest-mptLibrary.$(OBJEXT) \
-	common/libopenmpttest-mptOS.$(OBJEXT) \
-	common/libopenmpttest-mptPathString.$(OBJEXT) \
-	common/libopenmpttest-mptRandom.$(OBJEXT) \
-	common/libopenmpttest-mptString.$(OBJEXT) \
-	common/libopenmpttest-mptStringFormat.$(OBJEXT) \
-	common/libopenmpttest-mptStringParse.$(OBJEXT) \
-	common/libopenmpttest-mptTime.$(OBJEXT) \
-	common/libopenmpttest-mptUUID.$(OBJEXT) \
-	common/libopenmpttest-Profiler.$(OBJEXT) \
-	common/libopenmpttest-serialization_utils.$(OBJEXT) \
-	common/libopenmpttest-stdafx.$(OBJEXT) \
-	common/libopenmpttest-typedefs.$(OBJEXT) \
-	common/libopenmpttest-version.$(OBJEXT) \
-	soundlib/libopenmpttest-AudioCriticalSection.$(OBJEXT) \
-	soundlib/libopenmpttest-Dither.$(OBJEXT) \
-	soundlib/libopenmpttest-Dlsbank.$(OBJEXT) \
-	soundlib/libopenmpttest-Fastmix.$(OBJEXT) \
-	soundlib/libopenmpttest-InstrumentExtensions.$(OBJEXT) \
-	soundlib/libopenmpttest-ITCompression.$(OBJEXT) \
-	soundlib/libopenmpttest-ITTools.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_669.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_amf.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_ams.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_dbm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_digi.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_dmf.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_dsm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_far.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_gdm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_imf.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_it.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_itp.$(OBJEXT) \
-	soundlib/libopenmpttest-load_j2b.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_mdl.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_med.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_mid.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_mo3.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_mod.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_mt2.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_mtm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_okt.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_plm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_psm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_ptm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_s3m.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_sfx.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_stm.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_ult.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_umx.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_wav.$(OBJEXT) \
-	soundlib/libopenmpttest-Load_xm.$(OBJEXT) \
-	soundlib/libopenmpttest-Message.$(OBJEXT) \
-	soundlib/libopenmpttest-MIDIEvents.$(OBJEXT) \
-	soundlib/libopenmpttest-MIDIMacros.$(OBJEXT) \
-	soundlib/libopenmpttest-MixerLoops.$(OBJEXT) \
-	soundlib/libopenmpttest-MixerSettings.$(OBJEXT) \
-	soundlib/libopenmpttest-MixFuncTable.$(OBJEXT) \
-	soundlib/libopenmpttest-Mmcmp.$(OBJEXT) \
-	soundlib/libopenmpttest-ModChannel.$(OBJEXT) \
-	soundlib/libopenmpttest-modcommand.$(OBJEXT) \
-	soundlib/libopenmpttest-ModInstrument.$(OBJEXT) \
-	soundlib/libopenmpttest-ModSample.$(OBJEXT) \
-	soundlib/libopenmpttest-ModSequence.$(OBJEXT) \
-	soundlib/libopenmpttest-modsmp_ctrl.$(OBJEXT) \
-	soundlib/libopenmpttest-mod_specifications.$(OBJEXT) \
-	soundlib/libopenmpttest-MPEGFrame.$(OBJEXT) \
-	soundlib/libopenmpttest-OggStream.$(OBJEXT) \
-	soundlib/libopenmpttest-patternContainer.$(OBJEXT) \
-	soundlib/libopenmpttest-pattern.$(OBJEXT) \
-	soundlib/libopenmpttest-RowVisitor.$(OBJEXT) \
-	soundlib/libopenmpttest-S3MTools.$(OBJEXT) \
-	soundlib/libopenmpttest-SampleFormats.$(OBJEXT) \
-	soundlib/libopenmpttest-SampleIO.$(OBJEXT) \
-	soundlib/libopenmpttest-Sndfile.$(OBJEXT) \
-	soundlib/libopenmpttest-Snd_flt.$(OBJEXT) \
-	soundlib/libopenmpttest-Snd_fx.$(OBJEXT) \
-	soundlib/libopenmpttest-Sndmix.$(OBJEXT) \
-	soundlib/libopenmpttest-SoundFilePlayConfig.$(OBJEXT) \
-	soundlib/libopenmpttest-Tables.$(OBJEXT) \
-	soundlib/libopenmpttest-Tagging.$(OBJEXT) \
-	soundlib/libopenmpttest-tuningbase.$(OBJEXT) \
-	soundlib/libopenmpttest-tuningCollection.$(OBJEXT) \
-	soundlib/libopenmpttest-tuning.$(OBJEXT) \
-	soundlib/libopenmpttest-UpgradeModule.$(OBJEXT) \
-	soundlib/libopenmpttest-WAVTools.$(OBJEXT) \
-	soundlib/libopenmpttest-WindowedFIR.$(OBJEXT) \
-	soundlib/libopenmpttest-XMTools.$(OBJEXT) \
-	soundlib/plugins/dmo/libopenmpttest-DMOPlugin.$(OBJEXT) \
-	soundlib/plugins/dmo/libopenmpttest-Compressor.$(OBJEXT) \
-	soundlib/plugins/dmo/libopenmpttest-Distortion.$(OBJEXT) \
-	soundlib/plugins/dmo/libopenmpttest-Echo.$(OBJEXT) \
-	soundlib/plugins/dmo/libopenmpttest-Gargle.$(OBJEXT) \
-	soundlib/plugins/dmo/libopenmpttest-ParamEq.$(OBJEXT) \
-	soundlib/plugins/dmo/libopenmpttest-WavesReverb.$(OBJEXT) \
-	soundlib/plugins/libopenmpttest-DigiBoosterEcho.$(OBJEXT) \
-	soundlib/plugins/libopenmpttest-PluginManager.$(OBJEXT) \
-	soundlib/plugins/libopenmpttest-PlugInterface.$(OBJEXT) \
-	libopenmpt/libopenmpttest-libopenmpt_c.$(OBJEXT) \
-	libopenmpt/libopenmpttest-libopenmpt_cxx.$(OBJEXT) \
-	libopenmpt/libopenmpttest-libopenmpt_ext.$(OBJEXT) \
-	libopenmpt/libopenmpttest-libopenmpt_impl.$(OBJEXT)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_DEPENDENCIES = $(lib_LTLIBRARIES) \
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@	$(am__DEPENDENCIES_1)
+libopenmpt_example_cxx_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(libopenmpt_example_cxx_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am__libopenmpttest_SOURCES_DIST = libopenmpt/libopenmpt_test.cpp \
+	test/test.cpp test/test.h test/TestTools.h \
+	test/TestToolsLib.cpp test/TestToolsLib.h \
+	test/TestToolsTracker.h build/svn_version/svn_version.h \
+	common/BuildSettings.h common/CompilerDetect.h \
+	common/ComponentManager.cpp common/ComponentManager.h \
+	common/Endianness.h common/FileReader.cpp common/FileReader.h \
+	common/FlagSet.h common/Logging.cpp common/Logging.h \
+	common/misc_util.cpp common/misc_util.h common/mptAtomic.h \
+	common/mptBufferIO.h common/mptCPU.cpp common/mptCPU.h \
+	common/mptCRC.h common/mptFileIO.cpp common/mptFileIO.h \
+	common/mptIO.cpp common/mptIO.h common/mptLibrary.cpp \
+	common/mptLibrary.h common/mptMutex.h common/mptOS.cpp \
+	common/mptOS.h common/mptPathString.cpp common/mptPathString.h \
+	common/mptRandom.cpp common/mptRandom.h common/mptString.cpp \
+	common/mptString.h common/mptStringFormat.cpp \
+	common/mptStringFormat.h common/mptStringParse.cpp \
+	common/mptStringParse.h common/mptThread.h common/mptTime.cpp \
+	common/mptTime.h common/mptTypeTraits.h common/mptUUID.cpp \
+	common/mptUUID.h common/Profiler.cpp common/Profiler.h \
+	common/serialization_utils.cpp common/serialization_utils.h \
+	common/stdafx.cpp common/stdafx.h common/StringFixer.h \
+	common/typedefs.cpp common/typedefs.h common/version.cpp \
+	common/version.h common/versionNumber.h \
+	soundlib/AudioCriticalSection.cpp \
+	soundlib/AudioCriticalSection.h soundlib/AudioReadTarget.h \
+	soundlib/ChunkReader.h soundlib/Dither.cpp soundlib/Dither.h \
+	soundlib/Dlsbank.cpp soundlib/Dlsbank.h soundlib/Fastmix.cpp \
+	soundlib/FloatMixer.h soundlib/InstrumentExtensions.cpp \
+	soundlib/IntMixer.h soundlib/ITCompression.cpp \
+	soundlib/ITCompression.h soundlib/ITTools.cpp \
+	soundlib/ITTools.h soundlib/Load_669.cpp soundlib/Load_amf.cpp \
+	soundlib/Load_ams.cpp soundlib/Load_dbm.cpp \
+	soundlib/Load_digi.cpp soundlib/Load_dmf.cpp \
+	soundlib/Load_dsm.cpp soundlib/Loaders.h soundlib/Load_far.cpp \
+	soundlib/Load_gdm.cpp soundlib/Load_imf.cpp \
+	soundlib/Load_it.cpp soundlib/Load_itp.cpp \
+	soundlib/load_j2b.cpp soundlib/Load_mdl.cpp \
+	soundlib/Load_med.cpp soundlib/Load_mid.cpp \
+	soundlib/Load_mo3.cpp soundlib/Load_mod.cpp \
+	soundlib/Load_mt2.cpp soundlib/Load_mtm.cpp \
+	soundlib/Load_okt.cpp soundlib/Load_plm.cpp \
+	soundlib/Load_psm.cpp soundlib/Load_ptm.cpp \
+	soundlib/Load_s3m.cpp soundlib/Load_sfx.cpp \
+	soundlib/Load_stm.cpp soundlib/Load_ult.cpp \
+	soundlib/Load_umx.cpp soundlib/Load_wav.cpp \
+	soundlib/Load_xm.cpp soundlib/Message.cpp soundlib/Message.h \
+	soundlib/MIDIEvents.cpp soundlib/MIDIEvents.h \
+	soundlib/MIDIMacros.cpp soundlib/MIDIMacros.h soundlib/Mixer.h \
+	soundlib/MixerInterface.h soundlib/MixerLoops.cpp \
+	soundlib/MixerLoops.h soundlib/MixerSettings.cpp \
+	soundlib/MixerSettings.h soundlib/MixFuncTable.cpp \
+	soundlib/MixFuncTable.h soundlib/Mmcmp.cpp \
+	soundlib/ModChannel.cpp soundlib/ModChannel.h \
+	soundlib/modcommand.cpp soundlib/modcommand.h \
+	soundlib/ModInstrument.cpp soundlib/ModInstrument.h \
+	soundlib/ModSample.cpp soundlib/ModSample.h \
+	soundlib/ModSequence.cpp soundlib/ModSequence.h \
+	soundlib/modsmp_ctrl.cpp soundlib/modsmp_ctrl.h \
+	soundlib/mod_specifications.cpp soundlib/mod_specifications.h \
+	soundlib/MPEGFrame.cpp soundlib/MPEGFrame.h \
+	soundlib/OggStream.cpp soundlib/OggStream.h \
+	soundlib/patternContainer.cpp soundlib/patternContainer.h \
+	soundlib/pattern.cpp soundlib/pattern.h soundlib/Resampler.h \
+	soundlib/RowVisitor.cpp soundlib/RowVisitor.h \
+	soundlib/S3MTools.cpp soundlib/S3MTools.h \
+	soundlib/SampleFormatConverters.h soundlib/SampleFormat.h \
+	soundlib/SampleFormats.cpp soundlib/SampleIO.cpp \
+	soundlib/SampleIO.h soundlib/Snd_defs.h soundlib/Sndfile.cpp \
+	soundlib/Sndfile.h soundlib/Snd_flt.cpp soundlib/Snd_fx.cpp \
+	soundlib/Sndmix.cpp soundlib/SoundFilePlayConfig.cpp \
+	soundlib/SoundFilePlayConfig.h soundlib/Tables.cpp \
+	soundlib/Tables.h soundlib/Tagging.cpp soundlib/Tagging.h \
+	soundlib/tuningbase.cpp soundlib/tuningbase.h \
+	soundlib/tuningCollection.cpp soundlib/tuningcollection.h \
+	soundlib/tuning.cpp soundlib/tuning.h \
+	soundlib/UpgradeModule.cpp soundlib/WAVTools.cpp \
+	soundlib/WAVTools.h soundlib/WindowedFIR.cpp \
+	soundlib/WindowedFIR.h soundlib/XMTools.cpp soundlib/XMTools.h \
+	soundlib/plugins/PlugInterface.h \
+	soundlib/plugins/dmo/DMOPlugin.cpp \
+	soundlib/plugins/dmo/DMOPlugin.h \
+	soundlib/plugins/dmo/Compressor.cpp \
+	soundlib/plugins/dmo/Compressor.h \
+	soundlib/plugins/dmo/Distortion.cpp \
+	soundlib/plugins/dmo/Distortion.h soundlib/plugins/dmo/Echo.h \
+	soundlib/plugins/dmo/Echo.cpp soundlib/plugins/dmo/Gargle.cpp \
+	soundlib/plugins/dmo/Gargle.h soundlib/plugins/dmo/ParamEq.cpp \
+	soundlib/plugins/dmo/ParamEq.h \
+	soundlib/plugins/dmo/WavesReverb.cpp \
+	soundlib/plugins/dmo/WavesReverb.h \
+	soundlib/plugins/DigiBoosterEcho.cpp \
+	soundlib/plugins/DigiBoosterEcho.h \
+	soundlib/plugins/PluginManager.cpp \
+	soundlib/plugins/PluginManager.h \
+	soundlib/plugins/PluginMixBuffer.h \
+	soundlib/plugins/PluginStructs.h \
+	soundlib/plugins/PlugInterface.cpp libopenmpt/libopenmpt_c.cpp \
+	libopenmpt/libopenmpt_cxx.cpp libopenmpt/libopenmpt_ext.cpp \
+	libopenmpt/libopenmpt_impl.cpp libopenmpt/libopenmpt_config.h \
+	libopenmpt/libopenmpt_ext.hpp libopenmpt/libopenmpt.h \
+	libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_impl.hpp \
+	libopenmpt/libopenmpt_internal.h \
+	libopenmpt/libopenmpt_stream_callbacks_fd.h \
+	libopenmpt/libopenmpt_stream_callbacks_file.h \
+	libopenmpt/libopenmpt_version.h
+@ENABLE_TESTS_TRUE@am_libopenmpttest_OBJECTS = libopenmpt/libopenmpttest-libopenmpt_test.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	test/libopenmpttest-test.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	test/libopenmpttest-TestToolsLib.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-ComponentManager.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-FileReader.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-Logging.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-misc_util.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptCPU.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptFileIO.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptIO.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptLibrary.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptOS.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptPathString.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptRandom.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptString.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptStringFormat.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptStringParse.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptTime.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-mptUUID.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-Profiler.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-serialization_utils.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-stdafx.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-typedefs.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	common/libopenmpttest-version.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-AudioCriticalSection.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Dither.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Dlsbank.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Fastmix.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-InstrumentExtensions.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-ITCompression.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-ITTools.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_669.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_amf.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_ams.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_dbm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_digi.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_dmf.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_dsm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_far.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_gdm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_imf.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_it.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_itp.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-load_j2b.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_mdl.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_med.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_mid.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_mo3.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_mod.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_mt2.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_mtm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_okt.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_plm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_psm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_ptm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_s3m.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_sfx.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_stm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_ult.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_umx.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_wav.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Load_xm.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Message.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-MIDIEvents.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-MIDIMacros.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-MixerLoops.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-MixerSettings.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-MixFuncTable.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Mmcmp.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-ModChannel.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-modcommand.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-ModInstrument.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-ModSample.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-ModSequence.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-modsmp_ctrl.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-mod_specifications.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-MPEGFrame.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-OggStream.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-patternContainer.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-pattern.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-RowVisitor.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-S3MTools.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-SampleFormats.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-SampleIO.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Sndfile.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Snd_flt.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Snd_fx.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Sndmix.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-SoundFilePlayConfig.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Tables.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-Tagging.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-tuningbase.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-tuningCollection.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-tuning.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-UpgradeModule.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-WAVTools.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-WindowedFIR.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/libopenmpttest-XMTools.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/libopenmpttest-DMOPlugin.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/libopenmpttest-Compressor.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/libopenmpttest-Distortion.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/libopenmpttest-Echo.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/libopenmpttest-Gargle.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/libopenmpttest-ParamEq.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/libopenmpttest-WavesReverb.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/libopenmpttest-DigiBoosterEcho.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/libopenmpttest-PluginManager.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/libopenmpttest-PlugInterface.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpttest-libopenmpt_c.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpttest-libopenmpt_cxx.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpttest-libopenmpt_ext.$(OBJEXT) \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpttest-libopenmpt_impl.$(OBJEXT)
 libopenmpttest_OBJECTS = $(am_libopenmpttest_OBJECTS)
-libopenmpttest_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_TESTS_TRUE@libopenmpttest_DEPENDENCIES =  \
+@ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@ENABLE_TESTS_TRUE@	$(am__DEPENDENCIES_1)
 libopenmpttest_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(libopenmpttest_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_openmpt123_OBJECTS =  \
-	src/openmpt123/openmpt123-openmpt123.$(OBJEXT)
+am__openmpt123_SOURCES_DIST = src/openmpt123/openmpt123_config.hpp \
+	src/openmpt123/openmpt123.cpp \
+	src/openmpt123/openmpt123_flac.hpp \
+	src/openmpt123/openmpt123.hpp \
+	src/openmpt123/openmpt123_mmio.hpp \
+	src/openmpt123/openmpt123_portaudio.hpp \
+	src/openmpt123/openmpt123_pulseaudio.hpp \
+	src/openmpt123/openmpt123_raw.hpp \
+	src/openmpt123/openmpt123_sdl.hpp \
+	src/openmpt123/openmpt123_sdl2.hpp \
+	src/openmpt123/openmpt123_sndfile.hpp \
+	src/openmpt123/openmpt123_stdout.hpp \
+	src/openmpt123/openmpt123_waveout.hpp
+@ENABLE_OPENMPT123_TRUE@am_openmpt123_OBJECTS = src/openmpt123/openmpt123-openmpt123.$(OBJEXT)
 openmpt123_OBJECTS = $(am_openmpt123_OBJECTS)
-openmpt123_DEPENDENCIES = libopenmpt.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+@ENABLE_OPENMPT123_TRUE@openmpt123_DEPENDENCIES = libopenmpt.la \
+@ENABLE_OPENMPT123_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_OPENMPT123_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_OPENMPT123_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_OPENMPT123_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_OPENMPT123_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_OPENMPT123_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_OPENMPT123_TRUE@	$(am__DEPENDENCIES_1)
+openmpt123_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(openmpt123_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -550,11 +715,12 @@ DIST_SOURCES = $(am__libmodplug_la_SOURCES_DIST) \
 	$(am__libopenmpt_modplug_la_SOURCES_DIST) \
 	$(am__libopenmpt_example_c_SOURCES_DIST) \
 	$(am__libopenmpt_example_c_mem_SOURCES_DIST) \
-	$(libopenmpt_example_c_probe_SOURCES) \
-	$(libopenmpt_example_c_stdout_SOURCES) \
+	$(am__libopenmpt_example_c_probe_SOURCES_DIST) \
+	$(am__libopenmpt_example_c_stdout_SOURCES_DIST) \
 	$(am__libopenmpt_example_c_unsafe_SOURCES_DIST) \
 	$(am__libopenmpt_example_cxx_SOURCES_DIST) \
-	$(libopenmpttest_SOURCES) $(openmpt123_SOURCES)
+	$(am__libopenmpttest_SOURCES_DIST) \
+	$(am__openmpt123_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -856,6 +1022,7 @@ LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBOPENMPT_LIBS_PRIVATE = @LIBOPENMPT_LIBS_PRIVATE@
 LIBOPENMPT_REQUIRES_PRIVATE = @LIBOPENMPT_REQUIRES_PRIVATE@
+LIBOPENMPT_WIN32_LIBS = @LIBOPENMPT_WIN32_LIBS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
@@ -874,6 +1041,7 @@ OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OGG_CFLAGS = @OGG_CFLAGS@
 OGG_LIBS = @OGG_LIBS@
+OPENMPT123_WIN32_LIBS = @OPENMPT123_WIN32_LIBS@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -909,6 +1077,8 @@ VORBISFILE_CFLAGS = @VORBISFILE_CFLAGS@
 VORBISFILE_LIBS = @VORBISFILE_LIBS@
 VORBIS_CFLAGS = @VORBIS_CFLAGS@
 VORBIS_LIBS = @VORBIS_LIBS@
+WIN32_CONSOLE_CFLAGS = @WIN32_CONSOLE_CFLAGS@
+WIN32_CONSOLE_CXXFLAGS = @WIN32_CONSOLE_CXXFLAGS@
 ZLIB_CFLAGS = @ZLIB_CFLAGS@
 ZLIB_LIBS = @ZLIB_LIBS@
 abs_builddir = @abs_builddir@
@@ -981,38 +1151,44 @@ nobase_dist_doc_DATA = examples/libopenmpt_example_cxx.cpp \
 	examples/libopenmpt_example_c.c \
 	examples/libopenmpt_example_c_probe.c \
 	examples/libopenmpt_example_c_stdout.c
-lib_LTLIBRARIES = libopenmpt.la $(am__append_3) $(am__append_5)
-libopenmpt_example_c_stdout_SOURCES = examples/libopenmpt_example_c_stdout.c
-libopenmpt_example_c_probe_SOURCES = examples/libopenmpt_example_c_probe.c
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_SOURCES = examples/libopenmpt_example_c.c
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_SOURCES = examples/libopenmpt_example_c_mem.c
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_SOURCES = examples/libopenmpt_example_c_unsafe.c
-@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_SOURCES = examples/libopenmpt_example_cxx.cpp
-libopenmpt_example_c_stdout_CPPFLAGS = 
-libopenmpt_example_c_probe_CPPFLAGS = 
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_CPPFLAGS = $(PORTAUDIO_CFLAGS)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_CPPFLAGS = $(PORTAUDIO_CFLAGS)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_CPPFLAGS = $(PORTAUDIO_CFLAGS)
-@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_CPPFLAGS = $(PORTAUDIOCPP_CFLAGS)
-libopenmpt_example_c_stdout_LDADD = $(lib_LTLIBRARIES)
-libopenmpt_example_c_probe_LDADD = $(lib_LTLIBRARIES)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
-@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
-@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIOCPP_LIBS)
+lib_LTLIBRARIES = libopenmpt.la $(am__append_4) $(am__append_6)
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_stdout_SOURCES = examples/libopenmpt_example_c_stdout.c
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_probe_SOURCES = examples/libopenmpt_example_c_probe.c
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_SOURCES = examples/libopenmpt_example_c.c
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_SOURCES = examples/libopenmpt_example_c_mem.c
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_SOURCES = examples/libopenmpt_example_c_unsafe.c
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_SOURCES = examples/libopenmpt_example_cxx.cpp
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_stdout_CPPFLAGS = 
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_probe_CPPFLAGS = 
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_CPPFLAGS = $(PORTAUDIO_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_CPPFLAGS = $(PORTAUDIO_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_CPPFLAGS = $(PORTAUDIO_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_CPPFLAGS = $(PORTAUDIOCPP_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_stdout_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_probe_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_stdout_LDADD = $(lib_LTLIBRARIES)
+@ENABLE_EXAMPLES_TRUE@libopenmpt_example_c_probe_LDADD = $(lib_LTLIBRARIES)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_mem_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIO_TRUE@libopenmpt_example_c_unsafe_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
+@ENABLE_EXAMPLES_TRUE@@HAVE_PORTAUDIOCPP_TRUE@libopenmpt_example_cxx_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIOCPP_LIBS)
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libopenmpt/libopenmpt.pc $(am__append_4)
+pkgconfig_DATA = libopenmpt/libopenmpt.pc $(am__append_5)
 nobase_include_HEADERS = libopenmpt/libopenmpt.h \
 	libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_version.h \
 	libopenmpt/libopenmpt_config.h \
 	libopenmpt/libopenmpt_stream_callbacks_fd.h \
 	libopenmpt/libopenmpt_stream_callbacks_file.h \
-	libopenmpt/libopenmpt_ext.hpp $(am__append_6)
-libopenmpt_la_LDFLAGS = -version-info 0:20:0
+	libopenmpt/libopenmpt_ext.hpp $(am__append_7)
+libopenmpt_la_LDFLAGS = -version-info 0:22:0
 libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
 libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpt_la_LIBADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS)
+libopenmpt_la_LIBADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS) $(LIBOPENMPT_WIN32_LIBS)
 libopenmpt_la_SOURCES = build/svn_version/svn_version.h \
 	common/BuildSettings.h common/CompilerDetect.h \
 	common/ComponentManager.cpp common/ComponentManager.h \
@@ -1132,133 +1308,186 @@ libopenmpt_la_SOURCES = build/svn_version/svn_version.h \
 @ENABLE_LIBMODPLUG_TRUE@libmodplug_la_SOURCES =  \
 @ENABLE_LIBMODPLUG_TRUE@	libopenmpt/libopenmpt_modplug.c \
 @ENABLE_LIBMODPLUG_TRUE@	libopenmpt/libopenmpt_modplug_cpp.cpp
-libopenmpttest_CPPFLAGS = -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
-libopenmpttest_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpttest_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpttest_LDADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS)
-libopenmpttest_SOURCES = libopenmpt/libopenmpt_test.cpp test/test.cpp \
-	test/test.h test/TestTools.h test/TestToolsLib.cpp \
-	test/TestToolsLib.h test/TestToolsTracker.h \
-	build/svn_version/svn_version.h common/BuildSettings.h \
-	common/CompilerDetect.h common/ComponentManager.cpp \
-	common/ComponentManager.h common/Endianness.h \
-	common/FileReader.cpp common/FileReader.h common/FlagSet.h \
-	common/Logging.cpp common/Logging.h common/misc_util.cpp \
-	common/misc_util.h common/mptAtomic.h common/mptBufferIO.h \
-	common/mptCPU.cpp common/mptCPU.h common/mptCRC.h \
-	common/mptFileIO.cpp common/mptFileIO.h common/mptIO.cpp \
-	common/mptIO.h common/mptLibrary.cpp common/mptLibrary.h \
-	common/mptMutex.h common/mptOS.cpp common/mptOS.h \
-	common/mptPathString.cpp common/mptPathString.h \
-	common/mptRandom.cpp common/mptRandom.h common/mptString.cpp \
-	common/mptString.h common/mptStringFormat.cpp \
-	common/mptStringFormat.h common/mptStringParse.cpp \
-	common/mptStringParse.h common/mptThread.h common/mptTime.cpp \
-	common/mptTime.h common/mptTypeTraits.h common/mptUUID.cpp \
-	common/mptUUID.h common/Profiler.cpp common/Profiler.h \
-	common/serialization_utils.cpp common/serialization_utils.h \
-	common/stdafx.cpp common/stdafx.h common/StringFixer.h \
-	common/typedefs.cpp common/typedefs.h common/version.cpp \
-	common/version.h common/versionNumber.h \
-	soundlib/AudioCriticalSection.cpp \
-	soundlib/AudioCriticalSection.h soundlib/AudioReadTarget.h \
-	soundlib/ChunkReader.h soundlib/Dither.cpp soundlib/Dither.h \
-	soundlib/Dlsbank.cpp soundlib/Dlsbank.h soundlib/Fastmix.cpp \
-	soundlib/FloatMixer.h soundlib/InstrumentExtensions.cpp \
-	soundlib/IntMixer.h soundlib/ITCompression.cpp \
-	soundlib/ITCompression.h soundlib/ITTools.cpp \
-	soundlib/ITTools.h soundlib/Load_669.cpp soundlib/Load_amf.cpp \
-	soundlib/Load_ams.cpp soundlib/Load_dbm.cpp \
-	soundlib/Load_digi.cpp soundlib/Load_dmf.cpp \
-	soundlib/Load_dsm.cpp soundlib/Loaders.h soundlib/Load_far.cpp \
-	soundlib/Load_gdm.cpp soundlib/Load_imf.cpp \
-	soundlib/Load_it.cpp soundlib/Load_itp.cpp \
-	soundlib/load_j2b.cpp soundlib/Load_mdl.cpp \
-	soundlib/Load_med.cpp soundlib/Load_mid.cpp \
-	soundlib/Load_mo3.cpp soundlib/Load_mod.cpp \
-	soundlib/Load_mt2.cpp soundlib/Load_mtm.cpp \
-	soundlib/Load_okt.cpp soundlib/Load_plm.cpp \
-	soundlib/Load_psm.cpp soundlib/Load_ptm.cpp \
-	soundlib/Load_s3m.cpp soundlib/Load_sfx.cpp \
-	soundlib/Load_stm.cpp soundlib/Load_ult.cpp \
-	soundlib/Load_umx.cpp soundlib/Load_wav.cpp \
-	soundlib/Load_xm.cpp soundlib/Message.cpp soundlib/Message.h \
-	soundlib/MIDIEvents.cpp soundlib/MIDIEvents.h \
-	soundlib/MIDIMacros.cpp soundlib/MIDIMacros.h soundlib/Mixer.h \
-	soundlib/MixerInterface.h soundlib/MixerLoops.cpp \
-	soundlib/MixerLoops.h soundlib/MixerSettings.cpp \
-	soundlib/MixerSettings.h soundlib/MixFuncTable.cpp \
-	soundlib/MixFuncTable.h soundlib/Mmcmp.cpp \
-	soundlib/ModChannel.cpp soundlib/ModChannel.h \
-	soundlib/modcommand.cpp soundlib/modcommand.h \
-	soundlib/ModInstrument.cpp soundlib/ModInstrument.h \
-	soundlib/ModSample.cpp soundlib/ModSample.h \
-	soundlib/ModSequence.cpp soundlib/ModSequence.h \
-	soundlib/modsmp_ctrl.cpp soundlib/modsmp_ctrl.h \
-	soundlib/mod_specifications.cpp soundlib/mod_specifications.h \
-	soundlib/MPEGFrame.cpp soundlib/MPEGFrame.h \
-	soundlib/OggStream.cpp soundlib/OggStream.h \
-	soundlib/patternContainer.cpp soundlib/patternContainer.h \
-	soundlib/pattern.cpp soundlib/pattern.h soundlib/Resampler.h \
-	soundlib/RowVisitor.cpp soundlib/RowVisitor.h \
-	soundlib/S3MTools.cpp soundlib/S3MTools.h \
-	soundlib/SampleFormatConverters.h soundlib/SampleFormat.h \
-	soundlib/SampleFormats.cpp soundlib/SampleIO.cpp \
-	soundlib/SampleIO.h soundlib/Snd_defs.h soundlib/Sndfile.cpp \
-	soundlib/Sndfile.h soundlib/Snd_flt.cpp soundlib/Snd_fx.cpp \
-	soundlib/Sndmix.cpp soundlib/SoundFilePlayConfig.cpp \
-	soundlib/SoundFilePlayConfig.h soundlib/Tables.cpp \
-	soundlib/Tables.h soundlib/Tagging.cpp soundlib/Tagging.h \
-	soundlib/tuningbase.cpp soundlib/tuningbase.h \
-	soundlib/tuningCollection.cpp soundlib/tuningcollection.h \
-	soundlib/tuning.cpp soundlib/tuning.h \
-	soundlib/UpgradeModule.cpp soundlib/WAVTools.cpp \
-	soundlib/WAVTools.h soundlib/WindowedFIR.cpp \
-	soundlib/WindowedFIR.h soundlib/XMTools.cpp soundlib/XMTools.h \
-	soundlib/plugins/PlugInterface.h \
-	soundlib/plugins/dmo/DMOPlugin.cpp \
-	soundlib/plugins/dmo/DMOPlugin.h \
-	soundlib/plugins/dmo/Compressor.cpp \
-	soundlib/plugins/dmo/Compressor.h \
-	soundlib/plugins/dmo/Distortion.cpp \
-	soundlib/plugins/dmo/Distortion.h soundlib/plugins/dmo/Echo.h \
-	soundlib/plugins/dmo/Echo.cpp soundlib/plugins/dmo/Echo.h \
-	soundlib/plugins/dmo/Gargle.cpp soundlib/plugins/dmo/Gargle.h \
-	soundlib/plugins/dmo/ParamEq.cpp \
-	soundlib/plugins/dmo/ParamEq.h \
-	soundlib/plugins/dmo/WavesReverb.cpp \
-	soundlib/plugins/dmo/WavesReverb.h \
-	soundlib/plugins/DigiBoosterEcho.cpp \
-	soundlib/plugins/DigiBoosterEcho.h \
-	soundlib/plugins/PluginManager.cpp \
-	soundlib/plugins/PluginManager.h \
-	soundlib/plugins/PluginMixBuffer.h \
-	soundlib/plugins/PluginStructs.h \
-	soundlib/plugins/PlugInterface.cpp \
-	soundlib/plugins/PlugInterface.h libopenmpt/libopenmpt_c.cpp \
-	libopenmpt/libopenmpt_cxx.cpp libopenmpt/libopenmpt_ext.cpp \
-	libopenmpt/libopenmpt_impl.cpp libopenmpt/libopenmpt_config.h \
-	libopenmpt/libopenmpt_ext.hpp libopenmpt/libopenmpt.h \
-	libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_impl.hpp \
-	libopenmpt/libopenmpt_internal.h \
-	libopenmpt/libopenmpt_stream_callbacks_fd.h \
-	libopenmpt/libopenmpt_stream_callbacks_file.h \
-	libopenmpt/libopenmpt_version.h
-openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
-openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS)
-openmpt123_SOURCES = src/openmpt123/openmpt123_config.hpp \
-	src/openmpt123/openmpt123.cpp \
-	src/openmpt123/openmpt123_flac.hpp \
-	src/openmpt123/openmpt123.hpp \
-	src/openmpt123/openmpt123_mmio.hpp \
-	src/openmpt123/openmpt123_portaudio.hpp \
-	src/openmpt123/openmpt123_pulseaudio.hpp \
-	src/openmpt123/openmpt123_raw.hpp \
-	src/openmpt123/openmpt123_sdl.hpp \
-	src/openmpt123/openmpt123_sdl2.hpp \
-	src/openmpt123/openmpt123_sndfile.hpp \
-	src/openmpt123/openmpt123_stdout.hpp \
-	src/openmpt123/openmpt123_waveout.hpp
+@ENABLE_TESTS_TRUE@libopenmpttest_CPPFLAGS = -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
+@ENABLE_TESTS_TRUE@libopenmpttest_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CXXFLAGS)
+@ENABLE_TESTS_TRUE@libopenmpttest_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
+@ENABLE_TESTS_TRUE@libopenmpttest_LDADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS) $(LIBOPENMPT_WIN32_LIB)
+@ENABLE_TESTS_TRUE@libopenmpttest_SOURCES =  \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_test.cpp \
+@ENABLE_TESTS_TRUE@	test/test.cpp test/test.h test/TestTools.h \
+@ENABLE_TESTS_TRUE@	test/TestToolsLib.cpp test/TestToolsLib.h \
+@ENABLE_TESTS_TRUE@	test/TestToolsTracker.h \
+@ENABLE_TESTS_TRUE@	build/svn_version/svn_version.h \
+@ENABLE_TESTS_TRUE@	common/BuildSettings.h \
+@ENABLE_TESTS_TRUE@	common/CompilerDetect.h \
+@ENABLE_TESTS_TRUE@	common/ComponentManager.cpp \
+@ENABLE_TESTS_TRUE@	common/ComponentManager.h \
+@ENABLE_TESTS_TRUE@	common/Endianness.h common/FileReader.cpp \
+@ENABLE_TESTS_TRUE@	common/FileReader.h common/FlagSet.h \
+@ENABLE_TESTS_TRUE@	common/Logging.cpp common/Logging.h \
+@ENABLE_TESTS_TRUE@	common/misc_util.cpp common/misc_util.h \
+@ENABLE_TESTS_TRUE@	common/mptAtomic.h common/mptBufferIO.h \
+@ENABLE_TESTS_TRUE@	common/mptCPU.cpp common/mptCPU.h \
+@ENABLE_TESTS_TRUE@	common/mptCRC.h common/mptFileIO.cpp \
+@ENABLE_TESTS_TRUE@	common/mptFileIO.h common/mptIO.cpp \
+@ENABLE_TESTS_TRUE@	common/mptIO.h common/mptLibrary.cpp \
+@ENABLE_TESTS_TRUE@	common/mptLibrary.h common/mptMutex.h \
+@ENABLE_TESTS_TRUE@	common/mptOS.cpp common/mptOS.h \
+@ENABLE_TESTS_TRUE@	common/mptPathString.cpp \
+@ENABLE_TESTS_TRUE@	common/mptPathString.h common/mptRandom.cpp \
+@ENABLE_TESTS_TRUE@	common/mptRandom.h common/mptString.cpp \
+@ENABLE_TESTS_TRUE@	common/mptString.h \
+@ENABLE_TESTS_TRUE@	common/mptStringFormat.cpp \
+@ENABLE_TESTS_TRUE@	common/mptStringFormat.h \
+@ENABLE_TESTS_TRUE@	common/mptStringParse.cpp \
+@ENABLE_TESTS_TRUE@	common/mptStringParse.h common/mptThread.h \
+@ENABLE_TESTS_TRUE@	common/mptTime.cpp common/mptTime.h \
+@ENABLE_TESTS_TRUE@	common/mptTypeTraits.h common/mptUUID.cpp \
+@ENABLE_TESTS_TRUE@	common/mptUUID.h common/Profiler.cpp \
+@ENABLE_TESTS_TRUE@	common/Profiler.h \
+@ENABLE_TESTS_TRUE@	common/serialization_utils.cpp \
+@ENABLE_TESTS_TRUE@	common/serialization_utils.h \
+@ENABLE_TESTS_TRUE@	common/stdafx.cpp common/stdafx.h \
+@ENABLE_TESTS_TRUE@	common/StringFixer.h common/typedefs.cpp \
+@ENABLE_TESTS_TRUE@	common/typedefs.h common/version.cpp \
+@ENABLE_TESTS_TRUE@	common/version.h common/versionNumber.h \
+@ENABLE_TESTS_TRUE@	soundlib/AudioCriticalSection.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/AudioCriticalSection.h \
+@ENABLE_TESTS_TRUE@	soundlib/AudioReadTarget.h \
+@ENABLE_TESTS_TRUE@	soundlib/ChunkReader.h soundlib/Dither.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Dither.h soundlib/Dlsbank.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Dlsbank.h soundlib/Fastmix.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/FloatMixer.h \
+@ENABLE_TESTS_TRUE@	soundlib/InstrumentExtensions.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/IntMixer.h \
+@ENABLE_TESTS_TRUE@	soundlib/ITCompression.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/ITCompression.h \
+@ENABLE_TESTS_TRUE@	soundlib/ITTools.cpp soundlib/ITTools.h \
+@ENABLE_TESTS_TRUE@	soundlib/Load_669.cpp soundlib/Load_amf.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_ams.cpp soundlib/Load_dbm.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_digi.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_dmf.cpp soundlib/Load_dsm.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Loaders.h soundlib/Load_far.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_gdm.cpp soundlib/Load_imf.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_it.cpp soundlib/Load_itp.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/load_j2b.cpp soundlib/Load_mdl.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_med.cpp soundlib/Load_mid.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_mo3.cpp soundlib/Load_mod.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_mt2.cpp soundlib/Load_mtm.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_okt.cpp soundlib/Load_plm.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_psm.cpp soundlib/Load_ptm.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_s3m.cpp soundlib/Load_sfx.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_stm.cpp soundlib/Load_ult.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_umx.cpp soundlib/Load_wav.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Load_xm.cpp soundlib/Message.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Message.h soundlib/MIDIEvents.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/MIDIEvents.h \
+@ENABLE_TESTS_TRUE@	soundlib/MIDIMacros.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/MIDIMacros.h soundlib/Mixer.h \
+@ENABLE_TESTS_TRUE@	soundlib/MixerInterface.h \
+@ENABLE_TESTS_TRUE@	soundlib/MixerLoops.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/MixerLoops.h \
+@ENABLE_TESTS_TRUE@	soundlib/MixerSettings.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/MixerSettings.h \
+@ENABLE_TESTS_TRUE@	soundlib/MixFuncTable.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/MixFuncTable.h soundlib/Mmcmp.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/ModChannel.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/ModChannel.h \
+@ENABLE_TESTS_TRUE@	soundlib/modcommand.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/modcommand.h \
+@ENABLE_TESTS_TRUE@	soundlib/ModInstrument.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/ModInstrument.h \
+@ENABLE_TESTS_TRUE@	soundlib/ModSample.cpp soundlib/ModSample.h \
+@ENABLE_TESTS_TRUE@	soundlib/ModSequence.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/ModSequence.h \
+@ENABLE_TESTS_TRUE@	soundlib/modsmp_ctrl.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/modsmp_ctrl.h \
+@ENABLE_TESTS_TRUE@	soundlib/mod_specifications.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/mod_specifications.h \
+@ENABLE_TESTS_TRUE@	soundlib/MPEGFrame.cpp soundlib/MPEGFrame.h \
+@ENABLE_TESTS_TRUE@	soundlib/OggStream.cpp soundlib/OggStream.h \
+@ENABLE_TESTS_TRUE@	soundlib/patternContainer.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/patternContainer.h \
+@ENABLE_TESTS_TRUE@	soundlib/pattern.cpp soundlib/pattern.h \
+@ENABLE_TESTS_TRUE@	soundlib/Resampler.h \
+@ENABLE_TESTS_TRUE@	soundlib/RowVisitor.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/RowVisitor.h soundlib/S3MTools.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/S3MTools.h \
+@ENABLE_TESTS_TRUE@	soundlib/SampleFormatConverters.h \
+@ENABLE_TESTS_TRUE@	soundlib/SampleFormat.h \
+@ENABLE_TESTS_TRUE@	soundlib/SampleFormats.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/SampleIO.cpp soundlib/SampleIO.h \
+@ENABLE_TESTS_TRUE@	soundlib/Snd_defs.h soundlib/Sndfile.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Sndfile.h soundlib/Snd_flt.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/Snd_fx.cpp soundlib/Sndmix.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/SoundFilePlayConfig.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/SoundFilePlayConfig.h \
+@ENABLE_TESTS_TRUE@	soundlib/Tables.cpp soundlib/Tables.h \
+@ENABLE_TESTS_TRUE@	soundlib/Tagging.cpp soundlib/Tagging.h \
+@ENABLE_TESTS_TRUE@	soundlib/tuningbase.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/tuningbase.h \
+@ENABLE_TESTS_TRUE@	soundlib/tuningCollection.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/tuningcollection.h \
+@ENABLE_TESTS_TRUE@	soundlib/tuning.cpp soundlib/tuning.h \
+@ENABLE_TESTS_TRUE@	soundlib/UpgradeModule.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/WAVTools.cpp soundlib/WAVTools.h \
+@ENABLE_TESTS_TRUE@	soundlib/WindowedFIR.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/WindowedFIR.h soundlib/XMTools.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/XMTools.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/PlugInterface.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/DMOPlugin.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/DMOPlugin.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Compressor.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Compressor.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Distortion.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Distortion.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Echo.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Echo.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Echo.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Gargle.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/Gargle.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/ParamEq.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/ParamEq.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/WavesReverb.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/dmo/WavesReverb.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/DigiBoosterEcho.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/DigiBoosterEcho.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/PluginManager.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/PluginManager.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/PluginMixBuffer.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/PluginStructs.h \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/PlugInterface.cpp \
+@ENABLE_TESTS_TRUE@	soundlib/plugins/PlugInterface.h \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_c.cpp \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_cxx.cpp \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_ext.cpp \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_impl.cpp \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_config.h \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_ext.hpp \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt.h \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt.hpp \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_impl.hpp \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_internal.h \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_stream_callbacks_fd.h \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_stream_callbacks_file.h \
+@ENABLE_TESTS_TRUE@	libopenmpt/libopenmpt_version.h
+@ENABLE_OPENMPT123_TRUE@openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
+@ENABLE_OPENMPT123_TRUE@openmpt123_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
+@ENABLE_OPENMPT123_TRUE@openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS) $(OPENMPT123_WIN32_LIBS)
+@ENABLE_OPENMPT123_TRUE@openmpt123_SOURCES =  \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_config.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123.cpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_flac.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_mmio.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_portaudio.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_pulseaudio.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_raw.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_sdl.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_sdl2.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_sndfile.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_stdout.hpp \
+@ENABLE_OPENMPT123_TRUE@	src/openmpt123/openmpt123_waveout.hpp
 #bin_PROGRAMS += openmpt123
 #openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
 #openmpt123_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS)
@@ -1276,7 +1505,7 @@ openmpt123_SOURCES = src/openmpt123/openmpt123_config.hpp \
 #openmpt123_SOURCES += openmpt123/openmpt123_sndfile.hpp
 #openmpt123_SOURCES += openmpt123/openmpt123_stdout.hpp
 #openmpt123_SOURCES += openmpt123/openmpt123_waveout.hpp
-man1_MANS = man/openmpt123.1
+@ENABLE_OPENMPT123_TRUE@man1_MANS = man/openmpt123.1
 @DX_COND_doc_TRUE@@DX_COND_html_TRUE@DX_CLEAN_HTML = @DX_DOCDIR@/html
 @DX_COND_doc_TRUE@DX_CLEANFILES = @DX_DOCDIR@/@PACKAGE@.tag @DX_DOCDIR@/doxygen_sqlite3.db -r $(DX_CLEAN_HTML) 
 all: config.h
@@ -1725,37 +1954,37 @@ examples/libopenmpt_example_c-libopenmpt_example_c.$(OBJEXT):  \
 
 libopenmpt_example_c$(EXEEXT): $(libopenmpt_example_c_OBJECTS) $(libopenmpt_example_c_DEPENDENCIES) $(EXTRA_libopenmpt_example_c_DEPENDENCIES) 
 	@rm -f libopenmpt_example_c$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(libopenmpt_example_c_OBJECTS) $(libopenmpt_example_c_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(libopenmpt_example_c_LINK) $(libopenmpt_example_c_OBJECTS) $(libopenmpt_example_c_LDADD) $(LIBS)
 examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.$(OBJEXT):  \
 	examples/$(am__dirstamp) examples/$(DEPDIR)/$(am__dirstamp)
 
 libopenmpt_example_c_mem$(EXEEXT): $(libopenmpt_example_c_mem_OBJECTS) $(libopenmpt_example_c_mem_DEPENDENCIES) $(EXTRA_libopenmpt_example_c_mem_DEPENDENCIES) 
 	@rm -f libopenmpt_example_c_mem$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(libopenmpt_example_c_mem_OBJECTS) $(libopenmpt_example_c_mem_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(libopenmpt_example_c_mem_LINK) $(libopenmpt_example_c_mem_OBJECTS) $(libopenmpt_example_c_mem_LDADD) $(LIBS)
 examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.$(OBJEXT):  \
 	examples/$(am__dirstamp) examples/$(DEPDIR)/$(am__dirstamp)
 
 libopenmpt_example_c_probe$(EXEEXT): $(libopenmpt_example_c_probe_OBJECTS) $(libopenmpt_example_c_probe_DEPENDENCIES) $(EXTRA_libopenmpt_example_c_probe_DEPENDENCIES) 
 	@rm -f libopenmpt_example_c_probe$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(libopenmpt_example_c_probe_OBJECTS) $(libopenmpt_example_c_probe_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(libopenmpt_example_c_probe_LINK) $(libopenmpt_example_c_probe_OBJECTS) $(libopenmpt_example_c_probe_LDADD) $(LIBS)
 examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.$(OBJEXT):  \
 	examples/$(am__dirstamp) examples/$(DEPDIR)/$(am__dirstamp)
 
 libopenmpt_example_c_stdout$(EXEEXT): $(libopenmpt_example_c_stdout_OBJECTS) $(libopenmpt_example_c_stdout_DEPENDENCIES) $(EXTRA_libopenmpt_example_c_stdout_DEPENDENCIES) 
 	@rm -f libopenmpt_example_c_stdout$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(libopenmpt_example_c_stdout_OBJECTS) $(libopenmpt_example_c_stdout_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(libopenmpt_example_c_stdout_LINK) $(libopenmpt_example_c_stdout_OBJECTS) $(libopenmpt_example_c_stdout_LDADD) $(LIBS)
 examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.$(OBJEXT):  \
 	examples/$(am__dirstamp) examples/$(DEPDIR)/$(am__dirstamp)
 
 libopenmpt_example_c_unsafe$(EXEEXT): $(libopenmpt_example_c_unsafe_OBJECTS) $(libopenmpt_example_c_unsafe_DEPENDENCIES) $(EXTRA_libopenmpt_example_c_unsafe_DEPENDENCIES) 
 	@rm -f libopenmpt_example_c_unsafe$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(libopenmpt_example_c_unsafe_OBJECTS) $(libopenmpt_example_c_unsafe_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(libopenmpt_example_c_unsafe_LINK) $(libopenmpt_example_c_unsafe_OBJECTS) $(libopenmpt_example_c_unsafe_LDADD) $(LIBS)
 examples/libopenmpt_example_cxx-libopenmpt_example_cxx.$(OBJEXT):  \
 	examples/$(am__dirstamp) examples/$(DEPDIR)/$(am__dirstamp)
 
 libopenmpt_example_cxx$(EXEEXT): $(libopenmpt_example_cxx_OBJECTS) $(libopenmpt_example_cxx_DEPENDENCIES) $(EXTRA_libopenmpt_example_cxx_DEPENDENCIES) 
 	@rm -f libopenmpt_example_cxx$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(libopenmpt_example_cxx_OBJECTS) $(libopenmpt_example_cxx_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(libopenmpt_example_cxx_LINK) $(libopenmpt_example_cxx_OBJECTS) $(libopenmpt_example_cxx_LDADD) $(LIBS)
 libopenmpt/libopenmpttest-libopenmpt_test.$(OBJEXT):  \
 	libopenmpt/$(am__dirstamp) \
 	libopenmpt/$(DEPDIR)/$(am__dirstamp)
@@ -2017,7 +2246,7 @@ src/openmpt123/openmpt123-openmpt123.$(OBJEXT):  \
 
 openmpt123$(EXEEXT): $(openmpt123_OBJECTS) $(openmpt123_DEPENDENCIES) $(EXTRA_openmpt123_DEPENDENCIES) 
 	@rm -f openmpt123$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(openmpt123_OBJECTS) $(openmpt123_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(openmpt123_LINK) $(openmpt123_OBJECTS) $(openmpt123_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -2310,74 +2539,74 @@ libopenmpt/libopenmpt_modplug_la-libopenmpt_modplug.lo: libopenmpt/libopenmpt_mo
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_modplug_la_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_modplug_la_CFLAGS) $(CFLAGS) -c -o libopenmpt/libopenmpt_modplug_la-libopenmpt_modplug.lo `test -f 'libopenmpt/libopenmpt_modplug.c' || echo '$(srcdir)/'`libopenmpt/libopenmpt_modplug.c
 
 examples/libopenmpt_example_c-libopenmpt_example_c.o: examples/libopenmpt_example_c.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c-libopenmpt_example_c.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Tpo -c -o examples/libopenmpt_example_c-libopenmpt_example_c.o `test -f 'examples/libopenmpt_example_c.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c-libopenmpt_example_c.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Tpo -c -o examples/libopenmpt_example_c-libopenmpt_example_c.o `test -f 'examples/libopenmpt_example_c.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Tpo examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c.c' object='examples/libopenmpt_example_c-libopenmpt_example_c.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c-libopenmpt_example_c.o `test -f 'examples/libopenmpt_example_c.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c-libopenmpt_example_c.o `test -f 'examples/libopenmpt_example_c.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c.c
 
 examples/libopenmpt_example_c-libopenmpt_example_c.obj: examples/libopenmpt_example_c.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c-libopenmpt_example_c.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Tpo -c -o examples/libopenmpt_example_c-libopenmpt_example_c.obj `if test -f 'examples/libopenmpt_example_c.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c-libopenmpt_example_c.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Tpo -c -o examples/libopenmpt_example_c-libopenmpt_example_c.obj `if test -f 'examples/libopenmpt_example_c.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c.c'; fi`
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Tpo examples/$(DEPDIR)/libopenmpt_example_c-libopenmpt_example_c.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c.c' object='examples/libopenmpt_example_c-libopenmpt_example_c.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c-libopenmpt_example_c.obj `if test -f 'examples/libopenmpt_example_c.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c-libopenmpt_example_c.obj `if test -f 'examples/libopenmpt_example_c.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c.c'; fi`
 
 examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o: examples/libopenmpt_example_c_mem.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Tpo -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o `test -f 'examples/libopenmpt_example_c_mem.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_mem.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_mem_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Tpo -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o `test -f 'examples/libopenmpt_example_c_mem.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_mem.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Tpo examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_mem.c' object='examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o `test -f 'examples/libopenmpt_example_c_mem.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_mem.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_mem_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.o `test -f 'examples/libopenmpt_example_c_mem.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_mem.c
 
 examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj: examples/libopenmpt_example_c_mem.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Tpo -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj `if test -f 'examples/libopenmpt_example_c_mem.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_mem.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_mem.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_mem_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Tpo -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj `if test -f 'examples/libopenmpt_example_c_mem.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_mem.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_mem.c'; fi`
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Tpo examples/$(DEPDIR)/libopenmpt_example_c_mem-libopenmpt_example_c_mem.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_mem.c' object='examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj `if test -f 'examples/libopenmpt_example_c_mem.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_mem.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_mem.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_mem_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_mem_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_mem-libopenmpt_example_c_mem.obj `if test -f 'examples/libopenmpt_example_c_mem.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_mem.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_mem.c'; fi`
 
 examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o: examples/libopenmpt_example_c_probe.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Tpo -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o `test -f 'examples/libopenmpt_example_c_probe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_probe.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_probe_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Tpo -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o `test -f 'examples/libopenmpt_example_c_probe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_probe.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Tpo examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_probe.c' object='examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o `test -f 'examples/libopenmpt_example_c_probe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_probe.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_probe_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.o `test -f 'examples/libopenmpt_example_c_probe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_probe.c
 
 examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj: examples/libopenmpt_example_c_probe.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Tpo -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj `if test -f 'examples/libopenmpt_example_c_probe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_probe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_probe.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_probe_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Tpo -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj `if test -f 'examples/libopenmpt_example_c_probe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_probe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_probe.c'; fi`
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Tpo examples/$(DEPDIR)/libopenmpt_example_c_probe-libopenmpt_example_c_probe.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_probe.c' object='examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj `if test -f 'examples/libopenmpt_example_c_probe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_probe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_probe.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_probe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_probe_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_probe-libopenmpt_example_c_probe.obj `if test -f 'examples/libopenmpt_example_c_probe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_probe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_probe.c'; fi`
 
 examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o: examples/libopenmpt_example_c_stdout.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Tpo -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o `test -f 'examples/libopenmpt_example_c_stdout.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_stdout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_stdout_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Tpo -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o `test -f 'examples/libopenmpt_example_c_stdout.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_stdout.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Tpo examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_stdout.c' object='examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o `test -f 'examples/libopenmpt_example_c_stdout.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_stdout.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_stdout_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.o `test -f 'examples/libopenmpt_example_c_stdout.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_stdout.c
 
 examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj: examples/libopenmpt_example_c_stdout.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Tpo -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj `if test -f 'examples/libopenmpt_example_c_stdout.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_stdout.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_stdout.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_stdout_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Tpo -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj `if test -f 'examples/libopenmpt_example_c_stdout.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_stdout.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_stdout.c'; fi`
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Tpo examples/$(DEPDIR)/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_stdout.c' object='examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj `if test -f 'examples/libopenmpt_example_c_stdout.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_stdout.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_stdout.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_stdout_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_stdout_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_stdout-libopenmpt_example_c_stdout.obj `if test -f 'examples/libopenmpt_example_c_stdout.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_stdout.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_stdout.c'; fi`
 
 examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o: examples/libopenmpt_example_c_unsafe.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Tpo -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o `test -f 'examples/libopenmpt_example_c_unsafe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_unsafe.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_unsafe_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Tpo -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o `test -f 'examples/libopenmpt_example_c_unsafe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_unsafe.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Tpo examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_unsafe.c' object='examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o `test -f 'examples/libopenmpt_example_c_unsafe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_unsafe.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_unsafe_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.o `test -f 'examples/libopenmpt_example_c_unsafe.c' || echo '$(srcdir)/'`examples/libopenmpt_example_c_unsafe.c
 
 examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj: examples/libopenmpt_example_c_unsafe.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Tpo -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj `if test -f 'examples/libopenmpt_example_c_unsafe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_unsafe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_unsafe.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_unsafe_CFLAGS) $(CFLAGS) -MT examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Tpo -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj `if test -f 'examples/libopenmpt_example_c_unsafe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_unsafe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_unsafe.c'; fi`
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Tpo examples/$(DEPDIR)/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='examples/libopenmpt_example_c_unsafe.c' object='examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj `if test -f 'examples/libopenmpt_example_c_unsafe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_unsafe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_unsafe.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_c_unsafe_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_c_unsafe_CFLAGS) $(CFLAGS) -c -o examples/libopenmpt_example_c_unsafe-libopenmpt_example_c_unsafe.obj `if test -f 'examples/libopenmpt_example_c_unsafe.c'; then $(CYGPATH_W) 'examples/libopenmpt_example_c_unsafe.c'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_c_unsafe.c'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -3181,18 +3410,18 @@ libopenmpt/libopenmpt_modplug_la-libopenmpt_modplug_cpp.lo: libopenmpt/libopenmp
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_modplug_la_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_modplug_la_CXXFLAGS) $(CXXFLAGS) -c -o libopenmpt/libopenmpt_modplug_la-libopenmpt_modplug_cpp.lo `test -f 'libopenmpt/libopenmpt_modplug_cpp.cpp' || echo '$(srcdir)/'`libopenmpt/libopenmpt_modplug_cpp.cpp
 
 examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o: examples/libopenmpt_example_cxx.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Tpo -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o `test -f 'examples/libopenmpt_example_cxx.cpp' || echo '$(srcdir)/'`examples/libopenmpt_example_cxx.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_cxx_CXXFLAGS) $(CXXFLAGS) -MT examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Tpo -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o `test -f 'examples/libopenmpt_example_cxx.cpp' || echo '$(srcdir)/'`examples/libopenmpt_example_cxx.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Tpo examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='examples/libopenmpt_example_cxx.cpp' object='examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o `test -f 'examples/libopenmpt_example_cxx.cpp' || echo '$(srcdir)/'`examples/libopenmpt_example_cxx.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_cxx_CXXFLAGS) $(CXXFLAGS) -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.o `test -f 'examples/libopenmpt_example_cxx.cpp' || echo '$(srcdir)/'`examples/libopenmpt_example_cxx.cpp
 
 examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj: examples/libopenmpt_example_cxx.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Tpo -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj `if test -f 'examples/libopenmpt_example_cxx.cpp'; then $(CYGPATH_W) 'examples/libopenmpt_example_cxx.cpp'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_cxx.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_cxx_CXXFLAGS) $(CXXFLAGS) -MT examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj -MD -MP -MF examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Tpo -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj `if test -f 'examples/libopenmpt_example_cxx.cpp'; then $(CYGPATH_W) 'examples/libopenmpt_example_cxx.cpp'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_cxx.cpp'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Tpo examples/$(DEPDIR)/libopenmpt_example_cxx-libopenmpt_example_cxx.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='examples/libopenmpt_example_cxx.cpp' object='examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj `if test -f 'examples/libopenmpt_example_cxx.cpp'; then $(CYGPATH_W) 'examples/libopenmpt_example_cxx.cpp'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_cxx.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpt_example_cxx_CPPFLAGS) $(CPPFLAGS) $(libopenmpt_example_cxx_CXXFLAGS) $(CXXFLAGS) -c -o examples/libopenmpt_example_cxx-libopenmpt_example_cxx.obj `if test -f 'examples/libopenmpt_example_cxx.cpp'; then $(CYGPATH_W) 'examples/libopenmpt_example_cxx.cpp'; else $(CYGPATH_W) '$(srcdir)/examples/libopenmpt_example_cxx.cpp'; fi`
 
 libopenmpt/libopenmpttest-libopenmpt_test.o: libopenmpt/libopenmpt_test.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpttest_CPPFLAGS) $(CPPFLAGS) $(libopenmpttest_CXXFLAGS) $(CXXFLAGS) -MT libopenmpt/libopenmpttest-libopenmpt_test.o -MD -MP -MF libopenmpt/$(DEPDIR)/libopenmpttest-libopenmpt_test.Tpo -c -o libopenmpt/libopenmpttest-libopenmpt_test.o `test -f 'libopenmpt/libopenmpt_test.cpp' || echo '$(srcdir)/'`libopenmpt/libopenmpt_test.cpp
@@ -4763,18 +4992,18 @@ libopenmpt/libopenmpttest-libopenmpt_impl.obj: libopenmpt/libopenmpt_impl.cpp
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libopenmpttest_CPPFLAGS) $(CPPFLAGS) $(libopenmpttest_CXXFLAGS) $(CXXFLAGS) -c -o libopenmpt/libopenmpttest-libopenmpt_impl.obj `if test -f 'libopenmpt/libopenmpt_impl.cpp'; then $(CYGPATH_W) 'libopenmpt/libopenmpt_impl.cpp'; else $(CYGPATH_W) '$(srcdir)/libopenmpt/libopenmpt_impl.cpp'; fi`
 
 src/openmpt123/openmpt123-openmpt123.o: src/openmpt123/openmpt123.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/openmpt123/openmpt123-openmpt123.o -MD -MP -MF src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Tpo -c -o src/openmpt123/openmpt123-openmpt123.o `test -f 'src/openmpt123/openmpt123.cpp' || echo '$(srcdir)/'`src/openmpt123/openmpt123.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(openmpt123_CXXFLAGS) $(CXXFLAGS) -MT src/openmpt123/openmpt123-openmpt123.o -MD -MP -MF src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Tpo -c -o src/openmpt123/openmpt123-openmpt123.o `test -f 'src/openmpt123/openmpt123.cpp' || echo '$(srcdir)/'`src/openmpt123/openmpt123.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Tpo src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/openmpt123/openmpt123.cpp' object='src/openmpt123/openmpt123-openmpt123.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/openmpt123/openmpt123-openmpt123.o `test -f 'src/openmpt123/openmpt123.cpp' || echo '$(srcdir)/'`src/openmpt123/openmpt123.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(openmpt123_CXXFLAGS) $(CXXFLAGS) -c -o src/openmpt123/openmpt123-openmpt123.o `test -f 'src/openmpt123/openmpt123.cpp' || echo '$(srcdir)/'`src/openmpt123/openmpt123.cpp
 
 src/openmpt123/openmpt123-openmpt123.obj: src/openmpt123/openmpt123.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/openmpt123/openmpt123-openmpt123.obj -MD -MP -MF src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Tpo -c -o src/openmpt123/openmpt123-openmpt123.obj `if test -f 'src/openmpt123/openmpt123.cpp'; then $(CYGPATH_W) 'src/openmpt123/openmpt123.cpp'; else $(CYGPATH_W) '$(srcdir)/src/openmpt123/openmpt123.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(openmpt123_CXXFLAGS) $(CXXFLAGS) -MT src/openmpt123/openmpt123-openmpt123.obj -MD -MP -MF src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Tpo -c -o src/openmpt123/openmpt123-openmpt123.obj `if test -f 'src/openmpt123/openmpt123.cpp'; then $(CYGPATH_W) 'src/openmpt123/openmpt123.cpp'; else $(CYGPATH_W) '$(srcdir)/src/openmpt123/openmpt123.cpp'; fi`
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Tpo src/openmpt123/$(DEPDIR)/openmpt123-openmpt123.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/openmpt123/openmpt123.cpp' object='src/openmpt123/openmpt123-openmpt123.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/openmpt123/openmpt123-openmpt123.obj `if test -f 'src/openmpt123/openmpt123.cpp'; then $(CYGPATH_W) 'src/openmpt123/openmpt123.cpp'; else $(CYGPATH_W) '$(srcdir)/src/openmpt123/openmpt123.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(openmpt123_CPPFLAGS) $(CPPFLAGS) $(openmpt123_CXXFLAGS) $(CXXFLAGS) -c -o src/openmpt123/openmpt123-openmpt123.obj `if test -f 'src/openmpt123/openmpt123.cpp'; then $(CYGPATH_W) 'src/openmpt123/openmpt123.cpp'; else $(CYGPATH_W) '$(srcdir)/src/openmpt123/openmpt123.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -5369,9 +5598,9 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@DX_COND_doc_FALSE@clean-local:
 @DX_COND_doc_FALSE@install-data-local:
 @DX_COND_doc_FALSE@uninstall-local:
+@DX_COND_doc_FALSE@clean-local:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
