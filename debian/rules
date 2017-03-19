@@ -17,7 +17,7 @@ override_dh_autoreconf:
 	dh_autoreconf --as-needed
 
 override_dh_auto_configure:
-	dh_auto_configure -- --disable-static --without-ltdl --enable-libopenmpt_modplug
+	dh_auto_configure -- --disable-static --enable-libopenmpt_modplug
 
 override_dh_installchangelogs:
 	dh_installchangelogs libopenmpt/dox/changelog.md
