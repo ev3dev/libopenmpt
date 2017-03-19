@@ -21,9 +21,3 @@ override_dh_auto_configure:
 
 override_dh_installchangelogs:
 	dh_installchangelogs libopenmpt/dox/changelog.md
-
-override_dh_install:
-	dh_install
-	mkdir -p $(MODPLUG_DEV_LIBDIR)/pkgconfig
-	sed 's/@DEB_HOST_MULTIARCH@/$(DEB_HOST_MULTIARCH)/' debian/libmodplug.pc.in > $(MODPLUG_DEV_LIBDIR)/pkgconfig/libmodplug.pc
-	ln -s libopenmpt_modplug.so $(MODPLUG_DEV_LIBDIR)/libmodplug.so

@@ -1,2 +1,4 @@
-libmodplug/*.h usr/include/libmodplug
+#!/usr/bin/dh-exec
+libmodplug/*.h           usr/include/libmodplug
+libmodplug/libmodplug.pc usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig
 usr/lib/*/libopenmpt_modplug.so
