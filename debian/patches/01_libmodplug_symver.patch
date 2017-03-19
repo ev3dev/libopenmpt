@@ -7,7 +7,7 @@ Forwarded: no
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -308,7 +308,7 @@ libopenmpt_la_SOURCES += libopenmpt/libo
+@@ -325,7 +325,7 @@ libopenmpt_la_SOURCES += libopenmpt/libo
  
  if ENABLE_LIBOPENMPT_MODPLUG
  lib_LTLIBRARIES += libopenmpt_modplug.la
