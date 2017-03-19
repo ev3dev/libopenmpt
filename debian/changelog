@@ -1,8 +1,10 @@
-libopenmpt (0.2.7774~beta22-1) UNRELEASED; urgency=medium
+libopenmpt (0.2.7774~beta22-1) experimental; urgency=medium
 
   * New upstream release.
+  * Disable dynamic library loading following upstream's default change.
+  * Use upstream's version of libmodplug.pc now that it's fixed.
 
- -- James Cowgill <jcowgill@debian.org>  Sun, 19 Mar 2017 19:45:05 +0000
+ -- James Cowgill <jcowgill@debian.org>  Sun, 19 Mar 2017 21:49:53 +0000
 
 libopenmpt (0.2.7561~beta20.5-1) experimental; urgency=medium
 
