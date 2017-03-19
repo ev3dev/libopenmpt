@@ -5,6 +5,56 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta22 (2017-03-11)
+
+ *  [**Bug**] Possible NULL-pointer dereference read during obscure
+    out-of-memory situations while handling exceptions in the C API.
+ *  [**Bug**] libmodplug: `libmodplug.pc` was wrong.
+ *  [**Bug**] Cross-compiling libopenmpt with autotools for Windows now properly
+    sets `-municode` and `-mconsole` as well as all required Windows system
+    libraries.
+ *  [**Bug**] Excessive loading times with malformed ITP / truncated AMS files.
+ *  [**Bug**] libopenmpt on Windows did not properly guard against current
+    working directory DLL injection attacks.
+
+ *  [**Change**] The `Makefile` and Autotools build system got new options
+    `USE_DLOPEN` and `--enable-dlopen` respectively which are required to be set
+    in order to load 3rd-party libraries dynamically. Additionally, the defaults
+    for detecting libdl and libltdl now also default to off with autotools. This
+    change has been made in order to make the default configuration as secure as
+    possible. Both build systems default to dependencies that facilitate native
+    MO3 decoding internally anyway, thus there is actually no practical
+    disadvantage with the new default settings at all.
+ *  [**Change**] Un4seen unmo3 support is now completely disabled by default in
+    all configurations and build systems.
+
+ *  [**Regression**] In order to securely load libmpg123, the Windows binary
+    packages only support the precise libmpg123 binary that is downloaded by the
+    `download_mpg123.vbs` script. Other binaries might also work, but this has
+    neither been tested nor is officially supported from now on.
+
+ *  Autotools build system now has options `--disable-openmpt123`,
+    `--disable-tests` and `--disable-examples` which may be desireable when
+    cross-compiling.
+ *  Windows binary packages now include a script `download_mpg123.vbs` which
+    downloads libmpg123 and copies it to the appropriate directories relative
+    to the uncompressed binary archive.
+ *  Do not set note volume to 0 on out-of-range offset in XM files.
+ *  Better import of some slide commands in SFX files.
+ *  Sample 15 in "Crew Generation" by Necros requires short loops at the
+    beginning of the sample to not be ignored. Since we need to ignore them in
+    some (non-ProTracker) modules, we heuristically disable the old loop
+    sanitization behaviour based on the module channel count.
+ *  Both normal and percentage offset in PLM files were handled as percentage
+    offset.
+ *  seek.sync_samples=1 did not apply PTM reverse offset effect and the volume
+    slide part of combined volume slide + vibrato commands.
+
+### libopenmpt 0.2-beta21 (skipped)
+
+ *  Version 0.2-beta21 has been skipped in order to avoid confusion with libtool
+    version of libopenmpt 0.3.0-pre.0 and 0.3.0-pre.1 development versions.
+
 ### libopenmpt 0.2-beta20.5 (2017-02-05)
 
  *  [**Bug**] libmodplug: C++ API did not build with MSVC2008 in 0.2-beta20.4.
@@ -14,7 +64,7 @@ is just a high-level summary.
  *  [**Bug**] Possible hangs with malformed files containing cyclic plugin
     routings.
 
- *  libmodplug: Added all missing C++ API symbols that are accessable via the
+ *  libmodplug: Added all missing C++ API symbols that are accessible via the
     public libmodplug header file.
  *  Channel frequency could wrap around after some excessive portamento / down
     in some formats since libopenmpt 0.2-beta17.

@@ -881,6 +881,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							offset += static_cast<SmpLength>(pChn->nOldHiOffset) << 16;
 						}
 						SampleOffset(*pChn, offset);
+					} else if(m.command == CMD_OFFSETPERCENTAGE)
+					{
+						SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, m.param, 255));
+					} else if(m.command == CMD_REVERSEOFFSET && pChn->pModSample != nullptr)
+					{
+						memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
+						ReverseSampleOffset(*pChn, m.param);
+						startTick = memory.state.m_nMusicSpeed - 1;
 					} else if(m.volcmd == VOLCMD_OFFSET)
 					{
 						if(m.vol <= CountOf(pChn->pModSample->cues) && pChn->pModSample != nullptr)
@@ -953,6 +961,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 					case CMD_TONEPORTAVOL:
 					case CMD_VOLUMESLIDE:
+					case CMD_VIBRATOVOL:
 						if(m.param || (GetType() != MOD_TYPE_MOD))
 						{
 							for(uint32 i = 0; i < numTicks; i++)
@@ -2000,13 +2009,28 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 #ifndef NO_PLUGINS
 				if (applyDNAtoPlug && p->nNote != NOTE_NONE)
 				{
+					ModCommand::NOTE plugNote;
+					if(p->nArpeggioLastNote != NOTE_NONE)
+					{
+						plugNote = p->nArpeggioLastNote;
+					} else
+					{
+						plugNote = p->nNote;
+						// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
+						if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
+						{
+							plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
+						}
+					}
+
 					switch(p->pModInstrument->nDNA)
 					{
 					case DNA_NOTECUT:
 					case DNA_NOTEOFF:
 					case DNA_NOTEFADE:
 						// Switch off duplicated note played on this plugin
-						SendMIDINote(i, p->nNote + NOTE_MAX_SPECIAL, 0);
+						SendMIDINote(i, plugNote + NOTE_MAX_SPECIAL, 0);
+						p->nArpeggioLastNote = NOTE_NONE;
 						break;
 					}
 				}
@@ -2052,13 +2076,21 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			{
 				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				ModCommand::NOTE note = pChn->nNote;
-				// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-				if(m_playBehaviour[kITRealNoteMapping] && note < CountOf(pChn->pModInstrument->NoteMap))
+				ModCommand::NOTE plugNote;
+				if(pChn->nArpeggioLastNote != NOTE_NONE)
 				{
-					note = pChn->pModInstrument->NoteMap[note - 1];
+					plugNote = pChn->nArpeggioLastNote;
+				} else
+				{
+					plugNote = pChn->nNote;
+					// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
+					if(m_playBehaviour[kITRealNoteMapping] && plugNote < CountOf(pChn->pModInstrument->NoteMap))
+					{
+						plugNote = pChn->pModInstrument->NoteMap[plugNote - NOTE_MIN];
+					}
 				}
-				applyNNAtoPlug = pPlugin->IsNotePlaying(note, GetBestMidiChannel(nChn), nChn);
+
+				applyNNAtoPlug = pPlugin->IsNotePlaying(plugNote, GetBestMidiChannel(nChn), nChn);
 			}
 		}
 	}
@@ -2093,6 +2125,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					//switch off note played on this plugin, on this tracker channel and midi channel
 					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote + NOTE_MAX_SPECIAL, 0, n);
 					SendMIDINote(nChn, NOTE_KEYOFF, 0);
+					pChn->nArpeggioLastNote = NOTE_NONE;
 					break;
 				}
 			}
@@ -2933,6 +2966,14 @@ bool CSoundFile::ProcessEffects()
 			}
 			break;
 
+		// Disorder Tracker 2 percentage offset
+		case CMD_OFFSETPERCENTAGE:
+			if(triggerNote)
+			{
+				SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, param, 255));
+			}
+			break;
+
 		// Arpeggio
 		case CMD_ARPEGGIO:
 			// IT compatibility 01. Don't ignore Arpeggio if no note is playing (also valid for ST3)
@@ -3210,14 +3251,7 @@ bool CSoundFile::ProcessEffects()
 
 		// PTM Reverse sample + offset (executed on every tick)
 		case CMD_REVERSEOFFSET:
-			if(pChn->pModSample != nullptr)
-			{
-				pChn->dwFlags.set(CHN_PINGPONGFLAG);
-				pChn->dwFlags.reset(CHN_LOOP);
-				pChn->nLength = pChn->pModSample->nLength;	// If there was a loop, extend sample to whole length.
-				pChn->nPos = (pChn->nLength - 1) - std::min<SmpLength>(SmpLength(param) << 8, pChn->nLength - 1);
-				pChn->nPosLo = 0;
-			}
+			ReverseSampleOffset(*pChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 #ifndef NO_PLUGINS
@@ -4951,10 +4985,6 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 	{
 		// Digitrakker really uses byte offsets, not sample offsets. WTF!
 		param /= 2u;
-	} else if(GetType() == MOD_TYPE_PLM)
-	{
-		// Offset in Disorder Tracker 2 is a percentage
-		param = Util::muldiv_unsigned(chn.nLength, param >> 8, 255);
 	}
 
 	if(chn.rowCommand.IsNote())
@@ -5005,7 +5035,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 				// FT2 Compatibility: Don't play note if offset is beyond sample length
 				// Test case: 3xx-no-old-samp.xm
 				chn.dwFlags.set(CHN_FASTVOLRAMP);
-				chn.nVolume = chn.nPeriod = 0;
+				chn.nPeriod = 0;
 			} else if(GetType() == MOD_TYPE_MOD && chn.dwFlags[CHN_LOOP])
 			{
 				chn.nPos = chn.nLoopStart;
@@ -5015,6 +5045,21 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 	{
 		// Some trackers can also call offset effects without notes next to them...
 		chn.nPos = param;
+		chn.nPosLo = 0;
+	}
+}
+
+
+// 
+void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const
+//----------------------------------------------------------------------------------
+{
+	if(chn.pModSample != nullptr)
+	{
+		chn.dwFlags.set(CHN_PINGPONGFLAG);
+		chn.dwFlags.reset(CHN_LOOP);
+		chn.nLength = chn.pModSample->nLength;	// If there was a loop, extend sample to whole length.
+		chn.nPos = (chn.nLength - 1) - std::min<SmpLength>(SmpLength(param) << 8, chn.nLength - 1);
 		chn.nPosLo = 0;
 	}
 }

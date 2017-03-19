@@ -29,7 +29,7 @@ const EffectType effectTypes[] =
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING, EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL, EFFECT_TYPE_PITCH,
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_PITCH,  EFFECT_TYPE_NORMAL,
-	EFFECT_TYPE_NORMAL,
+	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
 };
 
 STATIC_ASSERT(CountOf(effectTypes) == MAX_EFFECTS);
@@ -522,11 +522,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		switch(command)
 		{
 		case CMD_SPEED:
-			param = std::min<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
+			param = std::min<PARAM>(param, 0x1F);
 			break;
 			break;
 		case CMD_TEMPO:
-			param = std::max<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x20 : 0x21);
+			param = std::max<PARAM>(param, 0x20);
 			break;
 		}
 	}
@@ -829,6 +829,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			param = vol << 3;
 	}
 
+	if((command == CMD_REVERSEOFFSET || command == CMD_OFFSETPERCENTAGE) && !newSpecs.HasCommand(command))
+	{
+		command = CMD_OFFSET;
+	}
+
 	if(!newSpecs.HasNote(note))
 		note = NOTE_NONE;
 
@@ -875,6 +880,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_VIBRATOVOL,
 		CMD_VOLUME,
 		CMD_REVERSEOFFSET,
+		CMD_OFFSETPERCENTAGE,
 		CMD_OFFSET,
 		CMD_TREMOR,
 		CMD_RETRIG,
