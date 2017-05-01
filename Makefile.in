@@ -1184,7 +1184,7 @@ nobase_include_HEADERS = libopenmpt/libopenmpt.h \
 	libopenmpt/libopenmpt_stream_callbacks_fd.h \
 	libopenmpt/libopenmpt_stream_callbacks_file.h \
 	libopenmpt/libopenmpt_ext.hpp $(am__append_7)
-libopenmpt_la_LDFLAGS = -version-info 0:22:0
+libopenmpt_la_LDFLAGS = -version-info 0:23:0
 libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
 libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
@@ -5598,8 +5598,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@DX_COND_doc_FALSE@install-data-local:
 @DX_COND_doc_FALSE@uninstall-local:
+@DX_COND_doc_FALSE@install-data-local:
 @DX_COND_doc_FALSE@clean-local:
 clean: clean-am
 
