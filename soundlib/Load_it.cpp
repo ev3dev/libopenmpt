@@ -29,7 +29,6 @@
 #include "../common/mptBufferIO.h"
 #include "../common/version.h"
 #include "ITTools.h"
-#include <time.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -265,7 +264,7 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 {
 	if(trkvers < 0x0200)
 	{
-		// Load old format (IT 1.xx) instrument
+		// Load old format (IT 1.xx) instrument (early IT 2.xx modules may have cmwt set to 1.00 for backwards compatibility)
 		ITOldInstrument instrumentHeader;
 		if(!file.ReadConvertEndianness(instrumentHeader))
 		{
@@ -318,28 +317,51 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 }
 
 
+// Date calculation derived from https://alcor.concordia.ca/~gpkatch/gdate-algorithm.html
+template<int32 y, int32 m, int32 d>
+struct SchismVersionFromDate
+{
+	static const int32 mm = (m + 9) % 12;
+	static const int32 yy = y - mm / 10;
+	static const int32 date = yy * 365 + yy / 4 - yy / 100 + yy / 400 + (mm * 306 + 5) / 10 + (d - 1);
+
+	static int32 Version()
+	{
+		return 0x1050 + date - SchismVersionFromDate<2009, 10, 31>::date;
+	}
+};
+
+
 // Get version of Schism Tracker that was used to create an IT/S3M file.
 std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 //----------------------------------------------------------
 {
+	// Schism Tracker version information in a nutshell:
+	// < 0x020: a proper version (files saved by such versions are likely very rare)
+	// = 0x020: any version between the 0.2a release (2005-04-29?) and 2007-04-17
+	// = 0x050: anywhere from 2007-04-17 to 2009-10-31
+	// > 0x050: the number of days since 2009-10-31
+
 	cwtv &= 0xFFF;
 	std::string version;
 	if(cwtv > 0x050)
 	{
-		tm epoch, *verTime;
-		MemsetZero(epoch);
-		epoch.tm_year = 109, epoch.tm_mon = 9; epoch.tm_mday = 31;
-		time_t versionSec = ((cwtv - 0x050) * 86400) + mktime(&epoch);
-		if((verTime = localtime(&versionSec)) != nullptr)
+		int32 date = SchismVersionFromDate<2009, 10, 31>::date + cwtv - 0x050;
+		int32 y = static_cast<int32>((Util::mul32to64(10000, date) + 14780) / 3652425);
+		int32 ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
+		if(ddd < 0)
 		{
-			version = mpt::String::Print("Schism Tracker %1-%2-%3",
-				mpt::fmt::dec0<4>(verTime->tm_year + 1900),
-				mpt::fmt::dec0<2>(verTime->tm_mon + 1),
-				mpt::fmt::dec0<2>(verTime->tm_mday));
+			y--;
+			ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
 		}
+		int32 mi = (100 * ddd + 52) / 3060;
+		version = mpt::String::Print("Schism Tracker %1-%2-%3",
+			mpt::fmt::dec0<4>(y + (mi + 2) / 12),
+			mpt::fmt::dec0<2>((mi + 2) % 12 + 1),
+			mpt::fmt::dec0<2>(ddd - (mi * 306 + 5) / 10 + 1));
 	} else
 	{
-		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv & 0xFF));
+		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv));
 	}
 	return version;
 }
@@ -400,7 +422,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					interpretModPlugMade = true;
 			} else if(fileHeader.cmwt == 0x888 || fileHeader.cwtv == 0x888)
 			{
-				// OpenMPT 1.17 and 1.18 (raped IT format)
+				// OpenMPT 1.17.02.26 (r122) to 1.18 (raped IT format)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
@@ -424,6 +446,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
+				interpretModPlugMade = true;
+			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
+			{
+				// A rare variant used from OpenMPT 1.17.02.20 (r113) to 1.17.02.25 (r121), found e.g. in xTr1m-SD.it
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 02, 20);
 				interpretModPlugMade = true;
 			}
 		} else // case: type == MOD_TYPE_MPT
@@ -538,6 +565,31 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		minPtr = std::min(minPtr, fileHeader.msgoffset);
 	}
 
+	const bool possiblyUNMO3 = fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0
+		&& fileHeader.pwd == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && (fileHeader.flags & (ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig)) == 0;
+
+	if(possiblyUNMO3 && fileHeader.insnum == 0 && fileHeader.smpnum > 0 && file.GetPosition() + 4 * smpPos.size() + 2 <= minPtr)
+	{
+		// UNMO3 < v2.4.0.1 reserves some space for instrument parapointers even in sample mode.
+		// This makes reading MIDI macros and plugin information impossible.
+		// Note: While UNMO3 and CheeseTracker header fingerprints are almost identical, we cannot mis-detect CheeseTracker here,
+		// as it always sets the instrument mode flag and writes non-zero row highlights.
+		bool oldUNMO3 = true;
+		for(uint16 i = 0; i < fileHeader.smpnum; i++)
+		{
+			if(file.ReadUint32LE() != 0)
+			{
+				oldUNMO3 = false;
+				file.SkipBack(4 + i * 4);
+				break;
+			}
+		}
+		if(oldUNMO3)
+		{
+			m_madeWithTracker = "UNMO3 <= 2.4";
+		}
+	}
+
 	// Reading IT Edit History Info
 	// This is only supposed to be present if bit 1 of the special flags is set.
 	// However, old versions of Schism and probably other trackers always set this bit
@@ -559,20 +611,34 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				itHistory.ConvertToMPT(mptHistory);
 				m_FileHistory.push_back(mptHistory);
 			}
+
+			if(possiblyUNMO3 && nflt == 0)
+			{
+				if(fileHeader.special & ITFileHeader::embedPatternHighlights)
+					m_madeWithTracker = "UNMO3 <= 2.4.0.1";	// Set together with MIDI macro embed flag
+				else
+					m_madeWithTracker = "UNMO3";	// Either 2.4.0.2+ or no MIDI macros embedded
+			}
 		} else
 		{
 			// Oops, we were not supposed to read this.
 			file.SkipBack(2);
 		}
-	} else if(fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.cmwt == 0x0214 && fileHeader.cwtv == 0x0214 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && (fileHeader.special & (ITFileHeader::embedEditHistory | ITFileHeader::embedPatternHighlights)) == 0)
+	} else if(possiblyUNMO3 && fileHeader.special <= 1)
 	{
-		// Another non-conforming application is unmo3 < v2.4.0.1, which doesn't set the special bit
-		// at all, but still writes the two edit history length bytes (zeroes)...
-		if(file.ReadUint16LE() != 0)
+		// UNMO3 < v2.4.0.1 will set the edit history special bit iff the MIDI macro embed bit is also set,
+		// but it always writes the two extra bytes for the edit history length (zeroes).
+		// If MIDI macros are embedded, we are fine and end up in the first case of the if statement (read edit history).
+		// Otherwise we end up here and might have to read the edit history length.
+		if(file.ReadUint16LE() == 0)
 		{
-			// These were not zero bytes -> We're in the wrong place!
+			m_madeWithTracker = "UNMO3 <= 2.4";
+		} else
+		{
+			// These were not zero bytes, but potentially belong to the upcoming MIDI config - need to skip back.
+			// I think the only application that could end up here is CheeseTracker, if it allows to write 0 for both row highlight values.
+			// IT 2.14 itself will always write the edit history.
 			file.SkipBack(2);
-			m_madeWithTracker = "UNMO3";
 		}
 	}
 
@@ -597,7 +663,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		patNames = file.ReadChunk(file.ReadUint32LE());
 	}
 
-	m_nChannels = GetModSpecifications().channelsMin;
+	m_nChannels = 1;
 	// Read channel names: "CNAM"
 	if(file.ReadMagic("CNAM"))
 	{
@@ -612,21 +678,16 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read mix plugins information
-	if(file.CanRead(9))
-	{
-		LoadMixPlugins(file);
-	}
+	FileReader pluginChunk = file.ReadChunk((minPtr >= file.GetPosition()) ? minPtr - file.GetPosition() : file.BytesLeft());
+	LoadMixPlugins(pluginChunk);
 
 	// Read Song Message
-	if(fileHeader.special & ITFileHeader::embedSongMessage)
+	if((fileHeader.special & ITFileHeader::embedSongMessage) && fileHeader.msglength > 0 && file.Seek(fileHeader.msgoffset))
 	{
-		if(fileHeader.msglength > 0 && file.Seek(fileHeader.msgoffset))
-		{
-			// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
-			// if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0214 && itHeader.reserved == ITFileHeader::chibiMagic) --> Chibi detected.
-			// But we'll just use autodetection here:
-			m_songMessage.Read(file, fileHeader.msglength, SongMessage::leAutodetect);
-		}
+		// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
+		// if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0214 && itHeader.reserved == ITFileHeader::chibiMagic) --> Chibi detected.
+		// But we'll just use autodetection here:
+		m_songMessage.Read(file, fileHeader.msglength, SongMessage::leAutodetect);
 	}
 
 	// Reading Instruments
@@ -658,6 +719,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		lastSampleOffset = smpPos[fileHeader.smpnum - 1] + sizeof(ITSample);
 	}
 
+	bool possibleXMconversion = false;
+
 	// Reading Samples
 	m_nSamples = std::min(fileHeader.smpnum, SAMPLEINDEX(MAX_SAMPLES - 1));
 	bool lastSampleCompressed = false;
@@ -666,54 +729,71 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		ITSample sampleHeader;
 		if(smpPos[i] > 0 && file.Seek(smpPos[i]) && file.ReadConvertEndianness(sampleHeader))
 		{
-			if(!memcmp(sampleHeader.id, "IMPS", 4))
+			// IT does not check for the IMPS magic, and some bad XM->IT converter out there doesn't write the magic bytes for empty sample slots.
+			ModSample &sample = Samples[i + 1];
+			size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
+
+			mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
+
+			if(!file.Seek(sampleOffset))
+				continue;
+
+			lastSampleCompressed = false;
+			if(!sample.uFlags[SMP_KEEPONDISK])
 			{
-				ModSample &sample = Samples[i + 1];
-				size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
-
-				mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
-
-				if(!file.Seek(sampleOffset))
-					continue;
-
-				lastSampleCompressed = false;
-				if(!sample.uFlags[SMP_KEEPONDISK])
+				SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
+				if(loadFlags & loadSampleData)
 				{
-					SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
-					if(loadFlags & loadSampleData)
-					{
-						sampleIO.ReadSample(sample, file);
-					} else
-					{
-						if(sampleIO.GetEncoding() == SampleIO::signedPCM)
-							file.Skip(sample.nLength * (sampleIO.GetBitDepth() / 8) * sampleIO.GetNumChannels());
-						else
-							lastSampleCompressed = true;
-					}
+					sampleIO.ReadSample(sample, file);
 				} else
 				{
-					// External sample in MPTM file
-					size_t strLen;
-					file.ReadVarInt(strLen);
-					if(loadFlags & loadSampleData)
-					{
-						std::string filenameU8;
-						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
-#ifdef MPT_EXTERNAL_SAMPLES
-						SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
-#else
-						AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
-#endif // MPT_EXTERNAL_SAMPLES
-					} else
-					{
-						file.Skip(strLen);
-					}
+					if(sampleIO.IsVariableLengthEncoded())
+						lastSampleCompressed = true;
+					else
+						file.Skip(sampleIO.CalculateEncodedSize(sample.nLength));
 				}
-				lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
+				if(sampleIO.GetEncoding() == SampleIO::unsignedPCM && sample.nLength != 0)
+				{
+					// There is some XM to IT converter (don't know which one) and it identifies as IT 2.04.
+					// The only safe way to distinguish it from an IT-saved file are the unsigned samples.
+					possibleXMconversion = true;
+				}
+			} else
+			{
+				// External sample in MPTM file
+				size_t strLen;
+				file.ReadVarInt(strLen);
+				if(loadFlags & loadSampleData)
+				{
+					std::string filenameU8;
+					file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
+#ifdef MPT_EXTERNAL_SAMPLES
+					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
+#else
+					AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
+#endif // MPT_EXTERNAL_SAMPLES
+				} else
+				{
+					file.Skip(strLen);
+				}
 			}
+			lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 		}
 	}
 	m_nSamples = std::max(SAMPLEINDEX(1), GetNumSamples());
+
+	if(possibleXMconversion && fileHeader.cwtv == 0x0204 && fileHeader.cmwt == 0x0200 && fileHeader.special == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4)
+		&& (fileHeader.flags & ~ITFileHeader::linearSlides) == (ITFileHeader::useStereoPlayback | ITFileHeader::instrumentMode | ITFileHeader::itOldEffects)
+		&& fileHeader.globalvol == 128 && fileHeader.mv == 48 && fileHeader.sep == 128 && fileHeader.pwd == 0 && fileHeader.msglength == 0)
+	{
+		for(size_t i = 20; i < CountOf(fileHeader.songname); i++)
+		{
+			if(fileHeader.songname[i] != 0)
+				possibleXMconversion = false;
+		}
+		if(possibleXMconversion)
+			m_madeWithTracker = "XM Conversion";
+	}
 
 	m_nMinPeriod = 0;
 	m_nMaxPeriod = int32_max;
@@ -822,7 +902,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Load instrument and song extensions.
 	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
-	if(interpretModPlugMade)
+	if(interpretModPlugMade && m_madeWithTracker != "BeRoTracker")
 	{
 		m_playBehaviour.reset();
 		m_nMixLevels = mixLevelsOriginal;
@@ -1024,7 +1104,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
 			{
 				m_madeWithTracker = "ChibiTracker";
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.special <= 1 && fileHeader.pwd == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4)
+				&& (fileHeader.flags & (ITFileHeader::vol0Optimisations | ITFileHeader::instrumentMode | ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig | ITFileHeader::extendedFilterRange)) == ITFileHeader::instrumentMode
+				&& m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
 				m_madeWithTracker = "CheeseTracker";
 			} else if(fileHeader.cmwt < 0x0888)
@@ -1044,7 +1126,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if(m_FileHistory.empty() && memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 				{
-					// IT encrypts the total edit time of a module in the "reserved" fild
+					// IT encrypts the total edit time of a module in the "reserved" field
 					uint32 editTime;
 					memcpy(&editTime, fileHeader.reserved, 4);
 					SwapBytesLE(editTime);
@@ -1067,10 +1149,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		case 1:
 			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			// Hertz in linear mode: Added 2015-01-29, https://github.com/schismtracker/schismtracker/commit/671b30311082a0e7df041fca25f989b5d2478f69
-			if(fileHeader.cwtv < 0x17CC)
+			if(fileHeader.cwtv < SchismVersionFromDate<2015, 01, 29>::Version())
 				m_playBehaviour.reset(kHertzInLinearMode);
 			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
-			if(fileHeader.cwtv < 0x19A2)
+			if(fileHeader.cwtv < SchismVersionFromDate<2016, 05, 13>::Version())
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			break;
 		case 4:
@@ -1336,7 +1418,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Mix Plugins. Just calculate the size of this extra block for now.
 	if(!compatibilityExport)
 	{
-		dwExtra += SaveMixPlugins(NULL, true);
+		dwExtra += SaveMixPlugins(nullptr, true);
 	}
 
 	// Edit History. Just calculate the size of this extra block for now.
@@ -1426,20 +1508,14 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Writing instruments
+	const ModInstrument dummyInstr;
 	for(INSTRUMENTINDEX nins = 1; nins <= itHeader.insnum; nins++)
 	{
 		ITInstrumentEx iti;
 		uint32 instSize;
 
-		if(Instruments[nins])
-		{
-			instSize = iti.ConvertToIT(*Instruments[nins], compatibilityExport, *this);
-		} else
-		{
-			// Save Empty Instrument
-			ModInstrument dummy;
-			instSize = iti.ConvertToIT(dummy, compatibilityExport, *this);
-		}
+		const ModInstrument &instr = (Instruments[nins] != nullptr) ? *Instruments[nins] : dummyInstr;
+		instSize = iti.ConvertToIT(instr, compatibilityExport, *this);
 
 		// Writing instrument
 		inspos[nins - 1] = static_cast<uint32>(dwPos);
@@ -1448,7 +1524,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fwrite(&iti, 1, instSize, f);
 	}
 
-	// Writing sample headers
+	// Writing dummy sample headers (until we know the correct sample data offset)
 	ITSample itss;
 	MemsetZero(itss);
 	for(SAMPLEINDEX smp = 0; smp < itHeader.smpnum; smp++)
@@ -1692,7 +1768,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
 			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
-			const size_t strSize = mpt::saturate_cast<uint16>(filenameU8.size());
+			const size_t strSize = filenameU8.size();
 			size_t intBytes = 0;
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))
 			{
@@ -1910,7 +1986,11 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		char code[4];
 		file.ReadArray(code);
 		const uint32 chunkSize = file.ReadUint32LE();
-		if(!file.CanRead(chunkSize))
+		if(!memcmp(code, "IMPI", 4)	// IT instrument, we definitely read too far
+			|| !memcmp(code, "IMPS", 4)	// IT sample, ditto
+			|| !memcmp(code, "XTPM", 4)	// Instrument extensions, ditto
+			|| !memcmp(code, "STPM", 4)	// Song extensions, ditto
+			|| !file.CanRead(chunkSize))
 		{
 			file.SkipBack(8);
 			return;
@@ -1942,11 +2022,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		} else if(!memcmp(code, "MODU", 4))
 		{
 			m_madeWithTracker = "BeRoTracker";
-		} else if(!memcmp(code, "XTPM", 4))
-		{
-			// Read too far, chicken out...
-			file.SkipBack(8);
-			return;
+			m_dwLastSavedWithVersion = 0;	// Reset MPT detection for old files that have a similar fingerprint
 		}
 	}
 }
@@ -2245,7 +2321,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
 			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
-			case MAGIC4BE('L','S','W','V'): ReadField(chunk, size, m_dwLastSavedWithVersion); break;
+			case MAGIC4BE('L','S','W','V'): { uint32 ver; ReadField(chunk, size, ver); if(ver != 0) { m_dwLastSavedWithVersion = ver; } break; }
 			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
 			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
