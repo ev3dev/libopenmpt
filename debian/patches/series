@@ -1,1 +1,6 @@
 01_libmodplug_symver.patch
+up1-division-by-zero-in-tempo-calculation.patch
+up2-infinite-loop-in-plugin-routing.patch
+up3-excessive-cpu-consumption-on-malformed-files-dmf-mdl.patch
+up5-excessive-cpu-consumption-on-malformed-files-ams.patch
+up6-invalid-memory-read-when-applying-nnas-to-effect-plugins.patch
