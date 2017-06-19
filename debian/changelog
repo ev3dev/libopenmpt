@@ -1,3 +1,9 @@
+libopenmpt (0.2.8190~beta24-1) UNRELEASED; urgency=medium
+
+  *
+
+ -- James Cowgill <jcowgill@debian.org>  Mon, 19 Jun 2017 18:38:04 +0100
+
 libopenmpt (0.2.8043~beta23-1) experimental; urgency=medium
 
   * New upstream release.
