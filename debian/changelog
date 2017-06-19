@@ -1,8 +1,13 @@
-libopenmpt (0.2.8190~beta24-1) UNRELEASED; urgency=medium
+libopenmpt (0.2.8190~beta24-1) unstable; urgency=medium
 
-  *
+  * New upstream release.
+    - Fixes various local denial-of-service security bugs. (Closes: #864195)
+  * Upload to unstable.
 
- -- James Cowgill <jcowgill@debian.org>  Mon, 19 Jun 2017 18:38:04 +0100
+  * debian/control:
+    - Bump standards to 4.0.0 (no changes required).
+
+ -- James Cowgill <jcowgill@debian.org>  Mon, 19 Jun 2017 18:53:10 +0100
 
 libopenmpt (0.2.8043~beta23-1) experimental; urgency=medium
 
