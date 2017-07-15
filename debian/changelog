@@ -1,8 +1,10 @@
-libopenmpt (0.2.7386~beta20.3-3+deb9u2) UNRELEASED; urgency=medium
+libopenmpt (0.2.7386~beta20.3-3+deb9u2) stretch; urgency=medium
 
-  *
+  * Add security patches (Closes: #867579).
+    - up8: Out-of-bounds read while loading a malfomed PLM file.
+    - up10: CVE-2017-11311: Arbitrary code execution by a crafted PSM file.
 
- -- James Cowgill <jcowgill@debian.org>  Sat, 15 Jul 2017 16:13:13 +0100
+ -- James Cowgill <jcowgill@debian.org>  Sat, 15 Jul 2017 18:33:57 +0100
 
 libopenmpt (0.2.7386~beta20.3-3+deb9u1) stretch; urgency=medium
 
