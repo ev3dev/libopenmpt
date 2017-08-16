@@ -1,3 +1,9 @@
+libopenmpt (0.2.8760~beta27-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- James Cowgill <jcowgill@debian.org>  Wed, 16 Aug 2017 11:31:38 +0100
+
 libopenmpt (0.2.8461~beta26-1) unstable; urgency=medium
 
   * New upstream release.
