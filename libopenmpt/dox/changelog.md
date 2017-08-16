@@ -5,6 +5,23 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta27 (2017-08-12)
+
+ *  [**Bug**] libmodplug: The CSoundFile::Read function in the emulated
+    libmodplug C++ API returned the wrong value, causing qmmp (and possibly
+    other software) to crash.
+
+ *  The ProTracker note delay quirk should not retrigger already stopped samples
+    (fixes "Subi loses the Cops" by Subi).
+ *  ProTracker portamento between already stopped sample and another sample kept
+    playing the old sample (fixes "anarchy-main" by Jester).
+ *  Playback fix for instruments with custom tunings and transposed note maps
+    in MPTM format.
+ *  ProTracker quirk: If there is a note with a out-of-range note delay, it is
+    played on the next row (with an instant portamento), unless there is a new
+    note on that row.
+ *  ProTracker quirk: Apply tempo changes after the first tick of the row.
+
 ### libopenmpt 0.2-beta26 (2017-07-07)
 
  *  [**Bug**] Possible crashes with malformed PLM and PSM files.

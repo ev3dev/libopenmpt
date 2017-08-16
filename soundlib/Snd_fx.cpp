@@ -954,7 +954,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						}
 					}
 
-					if(m.volcmd < MAX_VOLCMDS && forbiddenVolCommands[m.volcmd])
+					if(m.volcmd < forbiddenVolCommands.size() && forbiddenVolCommands[m.volcmd])
 					{
 						stopNote = true;
 					}
@@ -1237,7 +1237,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 		// Special XM hack (also applies to MOD / S3M, except when playing IT-style S3Ms, such as k_vision.s3m)
 		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
 		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
-			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_PLM))
+			|| (GetType() == MOD_TYPE_PLM)
+			|| (GetType() == MOD_TYPE_MOD && pChn->nInc != 0)
 			|| m_playBehaviour[kST3PortaSampleChange])
 		{
 			// FT2 doesn't change the sample in this case,
@@ -2403,11 +2404,16 @@ bool CSoundFile::ProcessEffects()
 			// Instrument number resets the stacked ProTracker offset.
 			// Test case: ptoffset.mod
 			pChn->proTrackerOffset = 0;
-			// ProTracker compatibility: Instrument change always happens on the first tick, even when there is a note delay.
+			// ProTracker compatibility: Sample properties are always loaded on the first tick, even when there is a note delay.
 			// Test case: InstrDelay.mod
-			if(!triggerNote)
+			if(!triggerNote && pChn->nInc != 0)
 			{
-				InstrumentChange(pChn, instr, true, true, false);
+				pChn->nNewIns = static_cast<ModCommand::INSTR>(instr);
+				if(instr <= GetNumSamples())
+				{
+					pChn->nVolume = Samples[instr].nVolume;
+					pChn->nFineTune = Samples[instr].nFineTune;
+				}
 			}
 		}
 
@@ -5367,31 +5373,34 @@ void CSoundFile::SetSpeed(uint32 param)
 }
 
 
-void CSoundFile::SetTempo(TEMPO param, bool setAsNonModcommand)
-//-------------------------------------------------------------
+void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
+//----------------------------------------------------
 {
-	const CModSpecifications& specs = GetModSpecifications();
+	const CModSpecifications &specs = GetModSpecifications();
 
+	// Anything lower than the minimum tempo is considered to be a tempo slide
 	const TEMPO minTempo = (GetType() == MOD_TYPE_MDL) ? TEMPO(1, 0) : TEMPO(32, 0);
 
-	if(setAsNonModcommand)
+	if(setFromUI)
 	{
 		// Set tempo from UI - ignore slide commands and such.
 		m_PlayState.m_nMusicTempo = Clamp(param, specs.GetTempoMin(), specs.GetTempoMax());
-	} else if (param >= minTempo && m_SongFlags[SONG_FIRSTTICK])
+	} else if(param >= minTempo && m_SongFlags[SONG_FIRSTTICK] == !m_playBehaviour[kMODTempoOnSecondTick])
 	{
-		m_PlayState.m_nMusicTempo = param;
-		if (param > GetModSpecifications().GetTempoMax()) param = GetModSpecifications().GetTempoMax();
-	} else if (param < minTempo && !m_SongFlags[SONG_FIRSTTICK])
+		// ProTracker sets the tempo after the first tick.
+		// Note: The case of one tick per row is handled in ProcessRow() instead.
+		// Test case: TempoChange.mod
+		m_PlayState.m_nMusicTempo = std::min(param, specs.GetTempoMax());
+	} else if(param < minTempo && !m_SongFlags[SONG_FIRSTTICK])
 	{
 		// Tempo Slide
 		TEMPO tempDiff(param.GetInt() & 0x0F, 0);
-		if ((param.GetInt() & 0xF0) == 0x10)
+		if((param.GetInt() & 0xF0) == 0x10)
 			m_PlayState.m_nMusicTempo += tempDiff;
 		else
 			m_PlayState.m_nMusicTempo -= tempDiff;
 
-		TEMPO tempoMin = GetModSpecifications().GetTempoMin(), tempoMax = GetModSpecifications().GetTempoMax();
+		TEMPO tempoMin = specs.GetTempoMin(), tempoMax = specs.GetTempoMax();
 		if(m_playBehaviour[kTempoClamp])	// clamp tempo correctly in compatible mode
 		{
 			tempoMax.Set(255);
