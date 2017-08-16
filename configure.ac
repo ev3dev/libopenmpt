@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.2.8461-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.2.8762-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -20,9 +20,9 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
 
-AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26"], [svn version])
-AC_DEFINE([MPT_SVNVERSION], ["8461"], [svn version])
-AC_DEFINE([MPT_SVNDATE], ["2017-07-07T12:47:24.457926Z"], [svn date])
+AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.2.8760-beta27"], [svn version])
+AC_DEFINE([MPT_SVNVERSION], ["8762"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["2017-08-12T15:05:25.794968Z"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [true], [is package])
 
 

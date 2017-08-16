@@ -440,6 +440,11 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 bool CTuningRTI::ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize)
 //---------------------------------------------------------------------------
 {
+	// reject unknown types
+	if(m_TuningType != TT_GENERAL && m_TuningType != TT_GROUPGEOMETRIC && m_TuningType != TT_GEOMETRIC)
+	{
+		return true;
+	}
 	if (m_GroupSize < 0) {m_GroupSize = 0; return true;}
 	if (m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX)) return true;
 	if (IsOfType(TT_GROUPGEOMETRIC))
@@ -570,9 +575,14 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
 	size_t nSize = (val > 255) ? 255 : static_cast<size_t>(val); // Read 255 characters at max.
+	str.clear();
 	str.resize(nSize);
 	for(size_t i = 0; i < nSize; i++)
 		mpt::IO::ReadIntLE(iStrm, str[i]);
+	if(str.find_first_of('\0') != std::string::npos)
+	{ // trim \0 at the end
+		str.resize(str.find_first_of('\0'));
+	}
 }
 
 

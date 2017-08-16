@@ -205,9 +205,8 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 	}
 #endif // NO_PLUGINS
 
-	const samplecount_t countGoal = count;
 	samplecount_t countRendered = 0;
-	samplecount_t countToRender = countGoal;
+	samplecount_t countToRender = count;
 
 	while(!m_SongFlags[SONG_ENDREACHED] && countToRender > 0)
 	{
@@ -627,6 +626,25 @@ bool CSoundFile::ProcessRow()
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetRow(m_PlayState.m_nRow);
 		for (ModChannel *pChn = m_PlayState.Chn, *pEnd = pChn + m_nChannels; pChn != pEnd; pChn++, m++)
 		{
+			// First, handle some quirks that happen after the last tick of the previous row...
+			if(m_playBehaviour[kMODOutOfRangeNoteDelay]
+				&& !m->IsNote()
+				&& pChn->rowCommand.IsNote()
+				&& pChn->rowCommand.command == CMD_MODCMDEX && (pChn->rowCommand.param & 0xF0) == 0xD0
+				&& (pChn->rowCommand.param & 0x0Fu) >= m_PlayState.m_nMusicSpeed)
+			{
+				// In ProTracker, a note triggered by an out-of-range note delay can be heard on the next row
+				// if there is no new note on that row.
+				// Test case: NoteDelay-NextRow.mod
+				pChn->nPeriod = GetPeriodFromNote(pChn->rowCommand.note, pChn->nFineTune, 0);
+			}
+			if(m_playBehaviour[kMODTempoOnSecondTick] && !m_playBehaviour[kMODVBlankTiming] && m_PlayState.m_nMusicSpeed == 1 && pChn->rowCommand.command == CMD_TEMPO)
+			{
+				// ProTracker sets the tempo after the first tick. This block handles the case of one tick per row.
+				// Test case: TempoChange.mod
+				m_PlayState.m_nMusicTempo = TEMPO(pChn->rowCommand.param, 0);
+			}
+
 			pChn->rowCommand = *m;
 
 			pChn->rightVol = pChn->newRightVol;
@@ -2108,6 +2126,8 @@ bool CSoundFile::ReadNote()
 				{
 					ModCommand::NOTE note = pChn->nNote;
 					if(!ModCommand::IsNote(note)) note = pChn->nLastNote;
+					if(m_playBehaviour[kITRealNoteMapping] && note >= NOTE_MIN && note <= NOTE_MAX)
+						note = pIns->NoteMap[note - NOTE_MIN];
 					pChn->m_Freq = Util::Round<uint32>((pChn->nC5Speed << FREQ_FRACBITS) * vibratoFactor * pIns->pTuning->GetRatio(note - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
