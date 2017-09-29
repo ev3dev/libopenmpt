@@ -19,26 +19,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITFileHeader::ConvertEndianness()
-//------------------------------------
-{
-	SwapBytesLE(ordnum);
-	SwapBytesLE(insnum);
-	SwapBytesLE(smpnum);
-	SwapBytesLE(patnum);
-	SwapBytesLE(cwtv);
-	SwapBytesLE(cmwt);
-	SwapBytesLE(flags);
-	SwapBytesLE(special);
-	SwapBytesLE(msglength);
-	SwapBytesLE(msgoffset);
-}
-
-
 // Convert OpenMPT's internal envelope format into an IT/MPTM envelope.
 void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 envDefault)
-//-----------------------------------------------------------------------------------------------
 {
 	// Envelope Flags
 	if(mptEnv.dwFlags[ENV_ENABLED]) flags |= ITEnvelope::envEnabled;
@@ -76,7 +58,6 @@ void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, 
 
 // Convert IT/MPTM envelope data into OpenMPT's internal envelope format - To be used by ITInstrToMPT()
 void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 maxNodes) const
-//----------------------------------------------------------------------------------------------
 {
 	// Envelope Flags
 	mptEnv.dwFlags.set(ENV_ENABLED, (flags & ITEnvelope::envEnabled) != 0);
@@ -114,18 +95,8 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITOldInstrument::ConvertEndianness()
-//---------------------------------------
-{
-	SwapBytesLE(fadeout);
-	SwapBytesLE(trkvers);
-}
-
-
 // Convert an ITOldInstrument to OpenMPT's internal instrument representation.
 void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
-//-------------------------------------------------------------
 {
 	// Header
 	if(memcmp(id, "IMPI", 4))
@@ -191,18 +162,8 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITInstrument::ConvertEndianness()
-//------------------------------------
-{
-	SwapBytesLE(fadeout);
-	SwapBytesLE(trkvers);
-}
-
-
 // Convert OpenMPT's internal instrument representation to an ITInstrument.
 uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
-//---------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
 
@@ -295,7 +256,6 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 
 // Convert an ITInstrument to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
 uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) const
-//-------------------------------------------------------------------------------
 {
 	if(memcmp(id, "IMPI", 4))
 	{
@@ -314,8 +274,8 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	mptIns.dwFlags.set(INS_SETPANNING, !(dfp & ITInstrument::ignorePanning));
 
 	// Random Variation
-	mptIns.nVolSwing = std::min(rv, uint8(100));
-	mptIns.nPanSwing = std::min(rp, uint8(64));
+	mptIns.nVolSwing = std::min<uint8>(rv, 100);
+	mptIns.nPanSwing = std::min<uint8>(rp, 64);
 
 	// NNA Stuff
 	mptIns.nNNA = nna;
@@ -335,8 +295,8 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	// MPT used to have a slightly different encoding of MIDI program and banks which we are trying to fix here.
 	// Impulse Tracker / Schism Tracker will set trkvers to 0 in IT files,
 	// and we won't care about correctly importing MIDI programs and banks in ITI files.
-	// Chibi Tracker sets trkvers to 0x214, but always writes mpr=mbank=0.
-	// BeRoTracker sets trkvers to 0x214, but only writes mpr correctly.
+	// Chibi Tracker sets trkvers to 0x214, but always writes mpr=mbank=0 anyway.
+	// Old BeRoTracker versions set trkvers to 0x214 or 0x217.
 	//        <= MPT 1.07          <= MPT 1.16       OpenMPT 1.17-?      <= OpenMPT 1.26     definitely not MPT
 	if((trkvers == 0x0202 || trkvers == 0x0211 || trkvers == 0x0220 || trkvers == 0x0214) && mpr != 0xFF)
 	{
@@ -404,17 +364,8 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITInstrumentEx::ConvertEndianness()
-//--------------------------------------
-{
-	iti.ConvertEndianness();
-}
-
-
 // Convert OpenMPT's internal instrument representation to an ITInstrumentEx. Returns amount of bytes that need to be written to file.
 uint32 ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExport, const CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------------------------------
 {
 	uint32 instSize = iti.ConvertToIT(mptIns, compatExport, sndFile);
 
@@ -463,7 +414,6 @@ uint32 ITInstrumentEx::ConvertToIT(const ModInstrument &mptIns, bool compatExpor
 
 // Convert an ITInstrumentEx to OpenMPT's internal instrument representation. Returns size of the instrument data that has been read.
 uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) const
-//--------------------------------------------------------------------------------
 {
 	uint32 insSize = iti.ConvertToMPT(mptIns, fromType);
 
@@ -484,23 +434,8 @@ uint32 ITInstrumentEx::ConvertToMPT(ModInstrument &mptIns, MODTYPE fromType) con
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITSample::ConvertEndianness()
-//--------------------------------
-{
-	SwapBytesLE(length);
-	SwapBytesLE(loopbegin);
-	SwapBytesLE(loopend);
-	SwapBytesLE(C5Speed);
-	SwapBytesLE(susloopbegin);
-	SwapBytesLE(susloopend);
-	SwapBytesLE(samplepointer);
-}
-
-
 // Convert OpenMPT's internal sample representation to an ITSample.
 void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215, bool allowExternal)
-//--------------------------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
 
@@ -590,7 +525,6 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 
 // Convert an ITSample to OpenMPT's internal sample representation.
 uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
-//----------------------------------------------------
 {
 	if(memcmp(id, "IMPS", 4))
 	{
@@ -646,7 +580,6 @@ uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 
 // Retrieve the internal sample format flags for this instrument.
 SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
-//---------------------------------------------------
 {
 	SampleIO sampleIO(
 		(flags & ITSample::sample16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
@@ -692,19 +625,8 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 }
 
 
-// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-void ITHistoryStruct::ConvertEndianness()
-//---------------------------------------
-{
-	SwapBytesLE(fatdate);
-	SwapBytesLE(fattime);
-	SwapBytesLE(runtime);
-}
-
-
 // Convert an ITHistoryStruct to OpenMPT's internal edit history representation
 void ITHistoryStruct::ConvertToMPT(FileHistory &mptHistory) const
-//---------------------------------------------------------------
 {
 	// Decode FAT date and time
 	MemsetZero(mptHistory.loadDate);
@@ -720,7 +642,6 @@ void ITHistoryStruct::ConvertToMPT(FileHistory &mptHistory) const
 
 // Convert OpenMPT's internal edit history representation to an ITHistoryStruct
 void ITHistoryStruct::ConvertToIT(const FileHistory &mptHistory)
-//--------------------------------------------------------------
 {
 	// Create FAT file dates
 	fatdate = static_cast<uint16>(mptHistory.loadDate.tm_mday | ((mptHistory.loadDate.tm_mon + 1) << 5) | ((mptHistory.loadDate.tm_year - 80) << 9));

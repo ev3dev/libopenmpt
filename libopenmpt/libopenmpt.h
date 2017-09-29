@@ -26,6 +26,15 @@
  * failure, a NULL pointer is returned.
  * - Functions that return integer values signal error condition by returning
  * an invalid value (-1 in most cases, 0 in some cases).
+ * - All functions that work on an openmpt_module object will call an
+ * openmpt_error_func and depending on the value returned by this function log
+ * the error code and/xor/or store it inside the openmpt_module object. Stored
+ * error codes can be accessed with the openmpt_module_error_get_last() and
+ * openmpt_module_error_get_last_message(). Stored errors will not get cleared
+ * automatically and should be reset with openmpt_module_error_clear().
+ * - Some functions not directly related to an openmpt_module object take an
+ * explicit openmpt_error_func error function callback and a pointer to an int
+ * and behave analog to the functions working on an openmpt_module object.
  *
  * \section libopenmpt_c_strings Strings
  *
@@ -51,7 +60,7 @@
  * caller.
  * - openmpt_module_create() with a seekable stream will load the module via
  * callbacks to the stream interface. libopenmpt will not implement an
- * additional buffering layer in this case whih means the callbacks are assumed
+ * additional buffering layer in this case which means the callbacks are assumed
  * to be performant even with small i/o sizes.
  * - openmpt_module_create() with an unseekable stream will load the module via
  * callbacks to the stream interface. libopempt will make an internal copy as
@@ -66,7 +75,7 @@
  * | openmpt_module_create() with unseekable stream | <p style="background-color:yellow">medium</p> | <p style="background-color:red"   >high  </p> |
  *
  * In all cases, the data or stream passed to the create function is no longer
- * needed after the the openmpt_module has been created and can be freed by the
+ * needed after the openmpt_module has been created and can be freed by the
  * caller.
  *
  * \section libopenmpt_c_outputformat Output Format
@@ -93,7 +102,7 @@
  *
  * \section libopenmpt_c_threads libopenmpt in multi-threaded environments
  *
- * - libopenmpt is tread-aware.
+ * - libopenmpt is thread-aware.
  * - Individual libopenmpt objects are not thread-safe.
  * - libopenmpt itself does not spawn any user-visible threads but may spawn
  * threads for internal use.
@@ -136,7 +145,8 @@ extern "C" {
 /*! \brief Get the libopenmpt version number
  *
  * Returns the libopenmpt version number.
- * \return The value represents (major << 24 + minor << 16 + revision).
+ * \return The value represents (major << 24 + minor << 16 + patch << 0).
+ * \remarks libopenmpt < 0.3.0-pre used the following scheme: (major << 24 + minor << 16 + revision).
  */
 LIBOPENMPT_API uint32_t openmpt_get_library_version(void);
 
@@ -173,10 +183,15 @@ LIBOPENMPT_API void openmpt_free_string( const char * str );
  * \param key Key to query.
  *       Possible keys are:
  *        -  "library_version": verbose library version string
+ *        -  "library_version_is_release": "1" if the version is an officially released version
  *        -  "library_features": verbose library features string
  *        -  "core_version": verbose OpenMPT core version string
  *        -  "source_url": original source code URL
  *        -  "source_date": original source code date
+ *        -  "source_revision": original source code revision
+ *        -  "source_is_modified": "1" if the original source has been modified
+ *        -  "source_has_mixed_revisions": "1" if the original source has been compiled from different various revision
+ *        -  "source_is_package": "1" if the original source has been obtained from a source pacakge instead of source code version control
  *        -  "build": information about the current build (e.g. the build date or compiler used)
  *        -  "build_compiler": information about the compiler used to build libopenmpt
  *        -  "credits": all contributors
@@ -217,6 +232,7 @@ LIBOPENMPT_API int openmpt_is_extension_supported( const char * extension );
  * \param bytes Number of bytes to read.
  * \return Number of bytes actually read and written to dst.
  * \retval 0 End of stream or error.
+ * \remarks Short reads are allowed as long as they return at least 1 byte if EOF is not reached.
  */
 typedef size_t (*openmpt_stream_read_func)( void * stream, void * dst, size_t bytes );
 
@@ -229,6 +245,7 @@ typedef size_t (*openmpt_stream_read_func)( void * stream, void * dst, size_t by
  * \return Returns 0 on success.
  * \retval 0 Success.
  * \retval -1 Failure. Position does not get updated.
+ * \remarks libopenmpt will not try to seek beyond the file size, thus it is not important whether you allow for virtual positioning after the file end, or return an error in that case. The position equal to the file size needs to be seekable to.
  */
 typedef int (*openmpt_stream_seek_func)( void * stream, int64_t offset, int whence );
 
@@ -272,7 +289,7 @@ typedef struct openmpt_stream_callbacks {
 /*! \brief Logging function
  *
  * \param message UTF-8 encoded log message.
- * \param user User context that was passed to openmpt_module_create(), openmpt_module_create_from_memory() or openmpt_could_open_propability().
+ * \param user User context that was passed to openmpt_module_create2(), openmpt_module_create_from_memory2() or openmpt_could_open_probability2().
  */
 typedef void (*openmpt_log_func)( const char * message, void * user );
 
@@ -288,20 +305,320 @@ LIBOPENMPT_API void openmpt_log_func_default( const char * message, void * user 
  */
 LIBOPENMPT_API void openmpt_log_func_silent( const char * message, void * user );
 
+/*! No error. \since 0.3.0 */
+#define OPENMPT_ERROR_OK                     0
+
+/*! Lowest value libopenmpt will use for any of its own error codes. \since 0.3.0 */
+#define OPENMPT_ERROR_BASE                   256
+
+/*! Unknown internal error. \since 0.3.0 */
+#define OPENMPT_ERROR_UNKNOWN                ( OPENMPT_ERROR_BASE +   1 )
+
+/*! Unknown internal C++ exception. \since 0.3.0 */
+#define OPENMPT_ERROR_EXCEPTION              ( OPENMPT_ERROR_BASE +  11 )
+
+/*! Out of memory. \since 0.3.0 */
+#define OPENMPT_ERROR_OUT_OF_MEMORY          ( OPENMPT_ERROR_BASE +  21 )
+
+/*! Runtime error. \since 0.3.0 */
+#define OPENMPT_ERROR_RUNTIME                ( OPENMPT_ERROR_BASE +  30 )
+/*! Range error. \since 0.3.0 */
+#define OPENMPT_ERROR_RANGE                  ( OPENMPT_ERROR_BASE +  31 )
+/*! Arithmetic overflow. \since 0.3.0 */
+#define OPENMPT_ERROR_OVERFLOW               ( OPENMPT_ERROR_BASE +  32 )
+/*! Arithmetic underflow. \since 0.3.0 */
+#define OPENMPT_ERROR_UNDERFLOW              ( OPENMPT_ERROR_BASE +  33 )
+
+/*! Logic error. \since 0.3.0 */
+#define OPENMPT_ERROR_LOGIC                  ( OPENMPT_ERROR_BASE +  40 )
+/*! Value domain error. \since 0.3.0 */
+#define OPENMPT_ERROR_DOMAIN                 ( OPENMPT_ERROR_BASE +  41 )
+/*! Maximum supported size exceeded. \since 0.3.0 */
+#define OPENMPT_ERROR_LENGTH                 ( OPENMPT_ERROR_BASE +  42 )
+/*! Argument out of range. \since 0.3.0 */
+#define OPENMPT_ERROR_OUT_OF_RANGE           ( OPENMPT_ERROR_BASE +  43 )
+/*! Invalid argument. \since 0.3.0 */
+#define OPENMPT_ERROR_INVALID_ARGUMENT       ( OPENMPT_ERROR_BASE +  44 )
+
+/*! General libopenmpt error. \since 0.3.0 */
+#define OPENMPT_ERROR_GENERAL                ( OPENMPT_ERROR_BASE + 101 )
+/*! openmpt_module * is invalid. \since 0.3.0 */
+#define OPENMPT_ERROR_INVALID_MODULE_POINTER ( OPENMPT_ERROR_BASE + 102 )
+/*! NULL pointer argument. \since 0.3.0 */
+#define OPENMPT_ERROR_ARGUMENT_NULL_POINTER  ( OPENMPT_ERROR_BASE + 103 )
+
+/*! \brief Check whether the error is transient
+ *
+ * Checks whether an error code represents a transient error which may not occur again in a later try if for example memory has been freed up after an out-of-memory error.
+ * \param error Error code.
+ * \retval 0 Error is not transient.
+ * \retval 1 Error is transient.
+ * \sa OPENMPT_ERROR_OUT_OF_MEMORY
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_error_is_transient( int error );
+
+/*! \brief Convert error code to text
+ *
+ * Converts an error code into a text string describing the error.
+ * \param error Error code.
+ * \return Allocated string describing the error.
+ * \retval NULL Not enough memory to allocate the string.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API const char * openmpt_error_string( int error );
+
+/*! Do not log or store the error. \since 0.3.0 */
+#define OPENMPT_ERROR_FUNC_RESULT_NONE    0
+/*! Log the error. \since 0.3.0 */
+#define OPENMPT_ERROR_FUNC_RESULT_LOG     ( 1 << 0 )
+/*! Store the error. \since 0.3.0 */
+#define OPENMPT_ERROR_FUNC_RESULT_STORE   ( 1 << 1 )
+/*! Log and store the error. \since 0.3.0 */
+#define OPENMPT_ERROR_FUNC_RESULT_DEFAULT ( OPENMPT_ERROR_FUNC_RESULT_LOG | OPENMPT_ERROR_FUNC_RESULT_STORE )
+
+/*! \brief Error function
+ *
+ * \param error Error code.
+ * \param user User context that was passed to openmpt_module_create2(), openmpt_module_create_from_memory2() or openmpt_could_open_probability2().
+ * \return Mask of OPENMPT_ERROR_FUNC_RESULT_LOG and OPENMPT_ERROR_FUNC_RESULT_STORE.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_NONE Do not log or store the error.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_LOG Log the error.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_STORE Store the error.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_DEFAULT Log and store the error.
+ * \sa OPENMPT_ERROR_FUNC_RESULT_NONE
+ * \sa OPENMPT_ERROR_FUNC_RESULT_LOG
+ * \sa OPENMPT_ERROR_FUNC_RESULT_STORE
+ * \sa OPENMPT_ERROR_FUNC_RESULT_DEFAULT
+ * \sa openmpt_error_func_default
+ * \sa openmpt_error_func_log
+ * \sa openmpt_error_func_store
+ * \sa openmpt_error_func_ignore
+ * \sa openmpt_error_func_errno
+ * \since 0.3.0
+ */
+typedef int (*openmpt_error_func)( int error, void * user );
+
+/*! \brief Default error function
+ *
+ * Causes all errors to be logged and stored.
+ * \param error Error code.
+ * \param user Ignored.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_DEFAULT Always.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_error_func_default( int error, void * user );
+
+/*! \brief Log error function
+ *
+ * Causes all errors to be logged.
+ * \param error Error code.
+ * \param user Ignored.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_LOG Always.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_error_func_log( int error, void * user );
+
+/*! \brief Store error function
+ *
+ * Causes all errors to be stored.
+ * \param error Error code.
+ * \param user Ignored.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_STORE Always.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_error_func_store( int error, void * user );
+
+/*! \brief Ignore error function
+ *
+ * Causes all errors to be neither logged nor stored.
+ * \param error Error code.
+ * \param user Ignored.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_NONE Always.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_error_func_ignore( int error, void * user );
+
+/*! \brief Errno error function
+ *
+ * Causes all errors to be stored in the pointer passed in as user.
+ * \param error Error code.
+ * \param user Pointer to an int as generated by openmpt_error_func_errno_userdata.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_NONE user is not NULL.
+ * \retval OPENMPT_ERROR_FUNC_RESULT_DEFAULT user is NULL.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_error_func_errno( int error, void * user );
+
+/*! \brief User pointer for openmpt_error_func_errno
+ *
+ * Provides a suitable user pointer argument for openmpt_error_func_errno.
+ * \param error Pointer to an integer value to be used as output by openmpt_error_func_errno.
+ * \retval (void*)error.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API void * openmpt_error_func_errno_userdata( int * error );
+
 /*! \brief Roughly scan the input stream to find out whether libopenmpt might be able to open it
  *
  * \param stream_callbacks Input stream callback operations.
  * \param stream Input stream to scan.
  * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
- * \param logfunc Logging function where warning and errors are written.
- * \param user Logging function user context.
+ * \param logfunc Logging function where warning and errors are written. May be NULL.
+ * \param user Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
  * \return Probability between 0.0 and 1.0.
- * \remarks openmpt_could_open_propability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
- * \remarks openmpt_could_open_propability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_propability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_propability() returned 0.5. \include libopenmpt_example_c_probe.c
+ * \remarks openmpt_could_open_probability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
+ * \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
  * \sa \ref libopenmpt_c_fileio
  * \sa openmpt_stream_callbacks
+ * \deprecated Please use openmpt_module_could_open_probability2().
+ * \since 0.3.0
  */
-LIBOPENMPT_API double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user );
+LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_probability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user );
+
+/*! \brief Roughly scan the input stream to find out whether libopenmpt might be able to open it
+ *
+ * \param stream_callbacks Input stream callback operations.
+ * \param stream Input stream to scan.
+ * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
+ * \param logfunc Logging function where warning and errors are written. May be NULL.
+ * \param user Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \return Probability between 0.0 and 1.0.
+ * \remarks openmpt_could_open_probability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
+ * \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
+ * \sa \ref libopenmpt_c_fileio
+ * \sa openmpt_stream_callbacks
+ * \deprecated Please use openmpt_module_could_open_probability2().
+ */
+LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user );
+
+/*! \brief Roughly scan the input stream to find out whether libopenmpt might be able to open it
+ *
+ * \param stream_callbacks Input stream callback operations.
+ * \param stream Input stream to scan.
+ * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
+ * \param logfunc Logging function where warning and errors are written. May be NULL.
+ * \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param error Pointer to an integer where an error may get stored. May be NULL.
+ * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+ * \return Probability between 0.0 and 1.0.
+ * \remarks openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() provide a simpler and faster interface that fits almost all use cases better. It is recommended to use openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize() instead of openmpt_could_open_probability().
+ * \remarks openmpt_could_open_probability2() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you can be reasonably sure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
+ * \remarks openmpt_could_open_probability2() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability2() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability2() returned 0.5. \include libopenmpt_example_c_probe.c
+ * \sa \ref libopenmpt_c_fileio
+ * \sa openmpt_stream_callbacks
+ * \sa openmpt_probe_file_header
+ * \sa openmpt_probe_file_header_without_filesize
+ * \since 0.3.0
+ */
+LIBOPENMPT_API double openmpt_could_open_probability2( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+
+/*! \brief Get recommended header size for successfull format probing
+ *
+ * \sa openmpt_probe_file_header()
+ * \sa openmpt_probe_file_header_without_filesize()
+ * \since 0.3.0
+ */
+LIBOPENMPT_API size_t openmpt_probe_file_header_get_recommended_size(void);
+
+/*! Probe for module formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES    0x1ul
+/*! Probe for module-specific container formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS 0x2ul
+
+/*! Probe for the default set of formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT    ( OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES | OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS )
+/*! Probe for no formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_FLAGS_NONE       0x0ul
+
+/*! Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS      1
+/*! Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE      0
+/*! Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA (-1)
+/*! Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0 */
+#define OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR        (-255)
+
+/*! \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+ *
+ * \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+ * \param data Beginning of the file data.
+ * \param size Size of the beginning of the file data.
+ * \param filesize Full size of the file data on disk.
+ * \param logfunc Logging function where warning and errors are written. May be NULL.
+ * \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param error Pointer to an integer where an error may get stored. May be NULL.
+ * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+ * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
+ * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
+ * \sa openmpt_probe_file_header_get_recommended_size()
+ * \sa openmpt_probe_file_header_without_filesize()
+ * \sa openmpt_probe_file_header_from_stream()
+ * \sa openmpt_could_open_probability2()
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_probe_file_header( uint64_t flags, const void * data, size_t size, uint64_t filesize, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+/*! \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+ *
+ * \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+ * \param data Beginning of the file data.
+ * \param size Size of the beginning of the file data.
+ * \param logfunc Logging function where warning and errors are written. May be NULL.
+ * \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param error Pointer to an integer where an error may get stored. May be NULL.
+ * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+ * \remarks It is recommended to use openmpt_prove_file_header() and provide the acutal file's size as a parameter if at all possible. libopenmpt can provide more accurate answers if the filesize is known.
+ * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size to the file's size. 
+ * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
+ * \sa openmpt_probe_file_header_get_recommended_size()
+ * \sa openmpt_probe_file_header()
+ * \sa openmpt_probe_file_header_from_stream()
+ * \sa openmpt_could_open_probability2()
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_probe_file_header_without_filesize( uint64_t flags, const void * data, size_t size, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+
+/*! \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+ *
+ * \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+ * \param stream_callbacks Input stream callback operations.
+ * \param stream Input stream to scan.
+ * \param logfunc Logging function where warning and errors are written. May be NULL.
+ * \param loguser Logging function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param error Pointer to an integer where an error may get stored. May be NULL.
+ * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+ * \remarks The stream is left in an unspecified state when this function returns.
+ * \remarks It is recommended to provide openmpt_probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
+ * \remarks openmpt_could_open_probability2() provides a more elaborate interace that might be require for special use cases. It is recommended to use openmpt_probe_file_header() though, if possible.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS The file will most likely be supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE The file is not supported by libopenmpt.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA An answer could not be determined with the amount of data provided.
+ * \retval OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR An internal error occurred.
+ * \sa openmpt_probe_file_header_get_recommended_size()
+ * \sa openmpt_probe_file_header()
+ * \sa openmpt_probe_file_header_without_filesize()
+ * \sa openmpt_could_open_probability2()
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_probe_file_header_from_stream( uint64_t flags, openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message );
+
 
 /*! \brief Opaque type representing a libopenmpt module
  */
@@ -316,34 +633,137 @@ typedef struct openmpt_module_initial_ctl {
  *
  * \param stream_callbacks Input stream callback operations.
  * \param stream Input stream to load the module from.
- * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
- * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
+ * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module. May be NULL.
+ * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa openmpt_stream_callbacks
  * \sa \ref libopenmpt_c_fileio
+ * \deprecated Please use openmpt_module_create2().
  */
-LIBOPENMPT_API openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls );
+LIBOPENMPT_API LIBOPENMPT_DEPRECATED openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, const openmpt_module_initial_ctl * ctls );
+
+/*! \brief Construct an openmpt_module
+ *
+ * \param stream_callbacks Input stream callback operations.
+ * \param stream Input stream to load the module from.
+ * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module. May be NULL.
+ * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param error Pointer to an integer where an error may get stored. May be NULL.
+ * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+ * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+ * \return A pointer to the constructed openmpt_module, or NULL on failure.
+ * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
+ * \sa openmpt_stream_callbacks
+ * \sa \ref libopenmpt_c_fileio
+ * \since 0.3.0
+ */
+LIBOPENMPT_API openmpt_module * openmpt_module_create2( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message, const openmpt_module_initial_ctl * ctls );
 
 /*! \brief Construct an openmpt_module
  *
  * \param filedata Data to load the module from.
  * \param filesize Amount of data available.
  * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
- * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
+ * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa \ref libopenmpt_c_fileio
+ * \deprecated Please use openmpt_module_create_from_memory2().
  */
-LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls );
+LIBOPENMPT_API LIBOPENMPT_DEPRECATED openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * loguser, const openmpt_module_initial_ctl * ctls );
+
+/*! \brief Construct an openmpt_module
+ *
+ * \param filedata Data to load the module from.
+ * \param filesize Amount of data available.
+ * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
+ * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context. Used to pass any user-defined data associated with this module to the logging function.
+ * \param error Pointer to an integer where an error may get stored. May be NULL.
+ * \param error_message Pointer to a string pointer where an error message may get stored. May be NULL.
+ * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
+ * \return A pointer to the constructed openmpt_module, or NULL on failure.
+ * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
+ * \sa \ref libopenmpt_c_fileio
+ * \since 0.3.0
+ */
+LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory2( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message, const openmpt_module_initial_ctl * ctls );
 
 /*! \brief Unload a previously created openmpt_module from memory.
  *
  * \param mod The module to unload.
  */
 LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
+
+/*! \brief Set logging function.
+ *
+ * Set the logging function of an already constructed openmpt_module.
+ * \param mod The module handle to work on.
+ * \param logfunc Logging function where warning and errors are written. The logging function may be called throughout the lifetime of openmpt_module.
+ * \param loguser User-defined data associated with this module. This value will be passed to the logging callback function (logfunc)
+ * \since 0.3.0
+ */
+LIBOPENMPT_API void openmpt_module_set_log_func( openmpt_module * mod, openmpt_log_func logfunc, void * loguser );
+
+/*! \brief Set error function.
+ *
+ * Set the error function of an already constructed openmpt_module.
+ * \param mod The module handle to work on.
+ * \param errfunc Error function to define error behaviour. May be NULL.
+ * \param erruser Error function user context.
+ * \since 0.3.0
+ */
+LIBOPENMPT_API void openmpt_module_set_error_func( openmpt_module * mod, openmpt_error_func errfunc, void * erruser );
+
+/*! \brief Get last error.
+ *
+ * Return the error currently stored in an openmpt_module. The stored error is not cleared.
+ * \param mod The module handle to work on.
+ * \return The error currently stored.
+ * \sa openmpt_module_error_get_last_message
+ * \sa openmpt_module_error_set_last
+ * \sa openmpt_module_error_clear
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int openmpt_module_error_get_last( openmpt_module * mod );
+
+/*! \brief Get last error message.
+ *
+ * Return the error message currently stored in an openmpt_module. The stored error is not cleared.
+ * \param mod The module handle to work on.
+ * \return The error message currently stored.
+ * \sa openmpt_module_error_set_last
+ * \sa openmpt_module_error_clear
+ * \since 0.3.0
+ */
+LIBOPENMPT_API const char * openmpt_module_error_get_last_message( openmpt_module * mod );
+
+/*! \brief Set last error.
+ *
+ * Set the error currently stored in an openmpt_module.
+ * \param mod The module handle to work on.
+ * \param error Error to be stored.
+ * \sa openmpt_module_error_get_last
+ * \sa openmpt_module_error_clear
+ * \since 0.3.0
+ */
+LIBOPENMPT_API void openmpt_module_error_set_last( openmpt_module * mod, int error );
+
+/*! \brief Clear last error.
+ *
+ * Set the error currently stored in an openmpt_module to OPPENMPT_ERROR_OK.
+ * \param mod The module handle to work on.
+ * \sa openmpt_module_error_get_last
+ * \sa openmpt_module_error_set_last
+ * \since 0.3.0
+ */
+LIBOPENMPT_API void openmpt_module_error_clear( openmpt_module * mod );
 
 /*! \brief Master Gain
  *
@@ -401,10 +821,18 @@ LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
  * \param mod The module handle to work on.
  * \param subsong Index of the sub-song. -1 plays all sub-songs consecutively.
  * \return 1 on success, 0 on failure.
- * \sa openmpt_module_get_num_subsongs, openmpt_module_get_subsong_names
+ * \sa openmpt_module_get_num_subsongs, openmpt_module_get_selected_subsong, openmpt_module_get_subsong_name
  * \remarks Whether subsong -1 (all subsongs consecutively), subsong 0 or some other subsong is selected by default, is an implementation detail and subject to change. If you do not want to care about subsongs, it is recommended to just not call openmpt_module_select_subsong() at all.
  */
 LIBOPENMPT_API int openmpt_module_select_subsong( openmpt_module * mod, int32_t subsong );
+/*! \brief Get currently selected sub-song from a multi-song module
+ *
+ * \param mod The module handle to work on.
+ * \return Currently selected sub-song. -1 for all subsongs consecutively, 0 or greater for the current sub-song index.
+ * \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_subsong_name
+ * \since 0.3.0
+ */
+LIBOPENMPT_API int32_t openmpt_module_get_selected_subsong( openmpt_module * mod );
 /*! \brief Set Repeat Count
  *
  * \param mod The module handle to work on.
@@ -750,7 +1178,7 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_m
  *
  * \param mod The module handle to work on.
  * \return The number of sub-songs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" sub-songs or "sequences" (if the format supports them).
- * \sa openmpt_module_get_subsong_names, openmpt_module_select_subsong
+ * \sa openmpt_module_get_subsong_name, openmpt_module_select_subsong, openmpt_module_get_selected_subsong
  */
 LIBOPENMPT_API int32_t openmpt_module_get_num_subsongs( openmpt_module * mod );
 /*! \brief Get the number of pattern channels
@@ -790,7 +1218,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_samples( openmpt_module * mod );
  * \param mod The module handle to work on.
  * \param index The sub-song whose name should be retrieved
  * \return The sub-song name.
- * \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong
+ * \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong, openmpt_module_get_selected_subsong
  */
 LIBOPENMPT_API const char * openmpt_module_get_subsong_name( openmpt_module * mod, int32_t index );
 /*! \brief Get a channel name
@@ -932,6 +1360,7 @@ LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel( openmp
  *          - subsong: The current subsong. Setting it has identical semantics as openmpt_module_select_subsong(), getting it returns the currently selected subsong.
  *          - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
  *          - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
+ *          - render.resampler.emulate_amiga: Set to "1" to enable the Amiga resampler for Amiga modules. This emulates the sound characteristics of the Paula chip and overrides the selected interpolation filter. Non-Amiga module formats are not affected by this setting. 
  *          - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt_module_read. Supported values are:
  *                    - 0: No dithering.
  *                    - 1: Default mode. Chosen by OpenMPT code, might change.
@@ -952,6 +1381,7 @@ LIBOPENMPT_API const char * openmpt_module_ctl_get( openmpt_module * mod, const 
  * \param mod The module handle to work on.
  * \param ctl The ctl key whose value should be set.
  * \param value The value that should be set.
+ * \return 1 if successful, 0 in case the value is not sensible (e.g. negative tempo factor) or the ctl is not recognized.
  * \sa openmpt_module_get_ctls
  */
 LIBOPENMPT_API int openmpt_module_ctl_set( openmpt_module * mod, const char * ctl, const char * value );
