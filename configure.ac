@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.2.8762-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.3.1+release.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -20,9 +20,16 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
 
-AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.2.8760-beta27"], [svn version])
-AC_DEFINE([MPT_SVNVERSION], ["8762"], [svn version])
-AC_DEFINE([MPT_SVNDATE], ["2017-08-12T15:05:25.794968Z"], [svn date])
+LIBOPENMPT_LTVER_CURRENT=1
+LIBOPENMPT_LTVER_REVISION=1
+LIBOPENMPT_LTVER_AGE=1
+AC_SUBST([LIBOPENMPT_LTVER_CURRENT])
+AC_SUBST([LIBOPENMPT_LTVER_REVISION])
+AC_SUBST([LIBOPENMPT_LTVER_AGE])
+
+AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.3.1"], [svn version])
+AC_DEFINE([MPT_SVNVERSION], ["9016"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["2017-09-28T06:05:55.172831Z"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [true], [is package])
 
 
@@ -70,7 +77,7 @@ MPG123_PKG=
 AC_ARG_WITH([mpg123], AS_HELP_STRING([--without-mpg123], [Disable use of libmpg123.]))
 AS_IF([test "x$with_mpg123" != "xno"],
  [
-  PKG_CHECK_MODULES([MPG123], [libmpg123],
+  PKG_CHECK_MODULES([MPG123], [libmpg123 >= 1.13.0],
    [
     MPG123_PKG=libmpg123
     AC_DEFINE([MPT_WITH_MPG123], [], [with mpg123])
@@ -117,93 +124,9 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
  ]
 )
 
-AC_ARG_ENABLE([dlopen], AS_HELP_STRING([--enable-dlopen], [Enable dynamic loading of 3rd-party libraries using dlopen or LoadLibray.]))
-AS_IF([test "x$enable-dlopen" = "xyes"],
- [
-  AC_DEFINE([MPT_ENABLE_DLOPEN], [], [enable dlopen])
- ]
-)
-  
-# Optional libopenmpt dependency: libltdl
-AC_ARG_WITH([ltdl], AS_HELP_STRING([--with-ltdl], [Enable the use of libtool libltdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_ltdl" = "xyes"],
- [
-  AC_CHECK_HEADER([ltdl.h],
-   [
-    AC_CHECK_LIB([ltdl], [lt_dlinit],
-     [
-      have_ltdl=1
-     ],
-     [
-      have_ltdl=0
-     ]
-    )
-   ],
-   [
-    have_ltdl=0
-   ]
-  )
-  AS_IF([test "x$have_ltdl" = "x0"],
-   [
-    AC_MSG_ERROR([Unable to find libltdl.])
-   ]
-  )
- ],
- [
-  have_ltdl=0
- ]
-)
-AS_IF([test "x$have_ltdl" = "x1"],
- [
-  LTDL_CPPFLAGS=-DMPT_WITH_LTDL
-  LTDL_LIBS=-lltdl
- ],
- [
-  LTDL_CPPFLAGS=
-  LTDL_LIBS=
- ]
-)
-AC_SUBST([LTDL_CPPFLAGS])
-AC_SUBST([LTDL_LIBS])
-
-# Optional libopenmpt dependency: libdl
-AC_ARG_WITH([dl], AS_HELP_STRING([--with-dl], [Enable the use of libdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_dl" = "xyes"],
- [
-  AC_SEARCH_LIBS([dlopen], [dl dld],
-   [
-    have_dl=1
-   ],
-   [
-    have_dl=0
-   ]
-  )
-  AS_IF([test "x$have_dl" = "x0"],
-   [
-    AC_MSG_ERROR([Unable to find libdl.])
-   ]
-  )
- ],
- [
-  have_dl=0
- ]
-)
-AS_IF([test "x$have_dl" = "x1"],
- [
-  DL_CPPFLAGS=-DMPT_WITH_DL
-  DL_LIBS=  
- ],
- [
-  DL_CPPFLAGS=
-  DL_LIBS=
- ]
-)
-AC_SUBST([DL_CPPFLAGS])
-AC_SUBST([DL_LIBS])
-
 
 LIBOPENMPT_REQUIRES_PRIVATE="$ZLIB_PKG $MPG123_PKG $OGG_PKG $VORBIS_PKG $VORBISFILE_PKG"
-LIBOPENMPT_LIBS_PRIVATE="$LTDL_LIBS $DL_LIBS"
+LIBOPENMPT_LIBS_PRIVATE=""
 AC_SUBST([LIBOPENMPT_REQUIRES_PRIVATE])
 AC_SUBST([LIBOPENMPT_LIBS_PRIVATE])
 
@@ -224,8 +147,10 @@ AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 
 
 # Optional openmpt123 dependency
-AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--without-pulseaudio], [Disable use of libpulse and libpulse-simple.]))
+AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--with-pulseaudio], [Enable use of libpulse and libpulse-simple (enabled by default on Linux).]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
+case $host_os in
+ linux*)
 AS_IF([test "x$with_pulseaudio" != "xno"],
  [
   PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
@@ -243,6 +168,27 @@ AS_IF([test "x$with_pulseaudio" != "xno"],
   have_pulseaudio=0
  ]
 )
+ ;;
+ *)
+AS_IF([test "x$with_pulseaudio" = "xyes"],
+ [
+  PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
+   [
+    have_pulseaudio=1
+    AC_DEFINE([MPT_WITH_PULSEAUDIO], [], [with libpulseaudio])
+   ],
+   [
+    have_pulseaudio=0
+    AC_MSG_ERROR([Unable to find libpulse and/or libpulse-simple.])
+   ]
+  )
+ ],
+ [
+  have_pulseaudio=0
+ ]
+)
+ ;;
+esac
 ],[have_pulseaudio=0])
 
 # Optional openmpt123 and examples dependency

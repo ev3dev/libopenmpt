@@ -14,25 +14,20 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-
 // STM sample header struct
-struct PACKED STMSampleHeader
+struct STMSampleHeader
 {
-	char   filename[12];	// Can't have long comments - just filename comments :)
-	uint8  zero;
-	uint8  disk;			// A blast from the past
-	uint16 offset;			// 20-bit offset in file (lower 4 bits are zero)
-	uint16 length;			// Sample length
-	uint16 loopStart;		// Loop start point
-	uint16 loopEnd;			// Loop end point
-	uint8  volume;			// Volume
-	uint8  reserved2;
-	uint16 sampleRate;
-	uint8  reserved3[6];
+	char     filename[12];	// Can't have long comments - just filename comments :)
+	uint8le  zero;
+	uint8le  disk;			// A blast from the past
+	uint16le offset;		// 20-bit offset in file (lower 4 bits are zero)
+	uint16le length;		// Sample length
+	uint16le loopStart;		// Loop start point
+	uint16le loopEnd;		// Loop end point
+	uint8le  volume;		// Volume
+	uint8le  reserved2;
+	uint16le sampleRate;
+	uint8le  reserved3[6];
 
 	// Convert an STM sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -56,23 +51,13 @@ struct PACKED STMSampleHeader
 			mptSmp.nLoopEnd = std::min(mptSmp.nLoopEnd, mptSmp.nLength);
 		}
 	}
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(offset);
-		SwapBytesLE(length);
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(sampleRate);
-	}
 };
 
-STATIC_ASSERT(sizeof(STMSampleHeader) == 32);
+MPT_BINARY_STRUCT(STMSampleHeader, 32)
 
 
 // STM file header
-struct PACKED STMFileHeader
+struct STMFileHeader
 {
 	char  songname[20];
 	char  trackername[8];	// !Scream! for ST 2.xx
@@ -80,42 +65,76 @@ struct PACKED STMFileHeader
 	uint8 filetype;			// 1=song, 2=module (only 2 is supported, of course) :)
 	uint8 verMajor;
 	uint8 verMinor;
-	uint8 initTempo;				// Ticks per row. Keep in mind that effects are only updated on every 16th tick.
-	uint8 numPatterns;				// number of patterns
+	uint8 initTempo;		// Ticks per row. Keep in mind that effects are only updated on every 16th tick.
+	uint8 numPatterns;		// number of patterns
 	uint8 globalVolume;
 	uint8 reserved[13];
 };
 
-STATIC_ASSERT(sizeof(STMFileHeader) == 48);
+MPT_BINARY_STRUCT(STMFileHeader, 48)
 
 
 // Pattern note entry
-struct PACKED STMPatternEntry
+struct STMPatternEntry
 {
-	uint8 note;
-	uint8 insvol;
-	uint8 volcmd;
-	uint8 cmdinf;
+	uint8le note;
+	uint8le insvol;
+	uint8le volcmd;
+	uint8le cmdinf;
 };
 
-STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
+MPT_BINARY_STRUCT(STMPatternEntry, 4)
 
 
-struct PACKED STMPatternData
+struct STMPatternData
 {
 	STMPatternEntry entry[64 * 4];
 };
 
-STATIC_ASSERT(sizeof(STMPatternData) == 4*64*4);
+MPT_BINARY_STRUCT(STMPatternData, 4*64*4)
 
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
+static bool ValidateHeader(const STMFileHeader &fileHeader)
+{
+	if(fileHeader.filetype != 2
+		|| (fileHeader.dosEof != 0x1A && fileHeader.dosEof != 2)	// ST2 ignores this, ST3 doesn't. putup10.stm / putup11.stm have dosEof = 2.
+		|| fileHeader.verMajor != 2
+		|| fileHeader.verMinor > 21	// ST3 only accepts 0, 10, 20 and 21
+		|| fileHeader.globalVolume > 64
+		|| (std::memcmp(fileHeader.trackername, "!Scream!", 8)
+			&& std::memcmp(fileHeader.trackername, "BMOD2STM", 8)
+			&& std::memcmp(fileHeader.trackername, "WUZAMOD!", 8))
+		)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+static uint64 GetHeaderMinimumAdditionalSize(const STMFileHeader &fileHeader)
+{
+	MPT_UNREFERENCED_PARAMETER(fileHeader);
+	return 31 * sizeof(STMSampleHeader) + 128;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSTM(MemoryFileReader file, const uint64 *pfilesize)
+{
+	STMFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	return ProbeAdditionalSize(file, pfilesize, GetHeaderMinimumAdditionalSize(fileHeader));
+}
 
 
 bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
 {
 	file.Rewind();
 
@@ -125,19 +144,19 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	// After reviewing all STM files on ModLand and ModArchive, it was found that the
 	// case-insensitive comparison is most likely not necessary for any files in the wild.
 	STMFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader)
-		|| fileHeader.filetype != 2
-		|| (fileHeader.dosEof != 0x1A && fileHeader.dosEof != 2)	// ST2 ignores this, ST3 doesn't. putup10.stm / putup11.stm have dosEof = 2.
-		|| fileHeader.verMajor != 2
-		|| fileHeader.verMinor > 21	// ST3 only accepts 0, 10, 20 and 21
-		|| fileHeader.globalVolume > 64
-		|| (memcmp(fileHeader.trackername, "!Scream!", 8)
-			&& memcmp(fileHeader.trackername, "BMOD2STM", 8)
-			&& memcmp(fileHeader.trackername, "WUZAMOD!", 8))
-		|| !file.CanRead(31 * sizeof(STMSampleHeader) + 128))
+	if(!file.ReadStruct(fileHeader))
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
@@ -147,7 +166,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songname);
 
 	// Read STM header
-	m_madeWithTracker = mpt::String::Print("Scream Tracker %1.%2", fileHeader.verMajor, mpt::fmt::dec0<2>(fileHeader.verMinor));
+	m_madeWithTracker = mpt::format(MPT_USTRING("Scream Tracker %1.%2"))(fileHeader.verMajor, mpt::ufmt::dec0<2>(fileHeader.verMinor));
 	m_nSamples = 31;
 	m_nChannels = 4;
 	m_nMinPeriod = 64;
@@ -174,7 +193,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		STMSampleHeader sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		file.ReadStruct(sampleHeader);
 		if(sampleHeader.zero != 0 && sampleHeader.zero != 46)	// putup10.stm has zero = 46
 			return false;
 		sampleHeader.ConvertToMPT(Samples[smp]);
@@ -183,15 +202,17 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read order list
-	Order.ReadAsByte(file, 128);
-	for(ORDERINDEX ord = 0; ord < 128; ord++)
+	ReadOrderFromFile<uint8>(Order(), file, 128);
+	for(auto &pat : Order())
 	{
-		if(Order[ord] == 99 || Order[ord] == 255)	// 99 is regular, sometimes a single 255 entry can be found too
-			Order[ord] = Order.GetInvalidPatIndex();
-		else if(Order[ord] > 99)
+		if(pat == 99 || pat == 255)	// 99 is regular, sometimes a single 255 entry can be found too
+			pat = Order.GetInvalidPatIndex();
+		else if(pat > 99)
 			return false;
 	}
 
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(fileHeader.numPatterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
 		STMPatternData patternData;
@@ -202,7 +223,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		ModCommand *m = Patterns[pat];
+		auto m = Patterns[pat].begin();
 		ORDERINDEX breakPos = ORDERINDEX_INVALID;
 		ROWINDEX breakRow = 63;	// Candidate row for inserting pattern break
 	
@@ -231,7 +252,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				m->vol = vol;
 			}
 
-			static const uint8 stmEffects[] =
+			static const EffectCommand stmEffects[] =
 			{
 				CMD_NONE, CMD_SPEED, CMD_POSITIONJUMP, CMD_PATTERNBREAK,					// .ABC
 				CMD_VOLUMESLIDE, CMD_PORTAMENTODOWN, CMD_PORTAMENTOUP, CMD_TONEPORTAMENTO,	// DEFG
@@ -302,7 +323,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(breakPos != ORDERINDEX_INVALID)
 		{
-			Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(breakPos)).Row(breakRow).Retry(EffectWriter::rmTryPreviousRow));
+			Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(breakPos)).Row(breakRow).RetryPreviousRow());
 		}
 	}
 
@@ -318,12 +339,13 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 		{
 			ModSample &sample = Samples[smp];
-			if(sample.nLength)
+			// ST2 just plays random noise for samples with a default volume of 0
+			if(sample.nLength && sample.nVolume > 0)
 			{
 				FileReader::off_t sampleOffset = sampleOffsets[smp - 1] << 4;
-				if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
+				// acidlamb.stm has some bogus samples with sample offsets past EOF
+				if(sampleOffset > sizeof(STMFileHeader) && file.Seek(sampleOffset))
 				{
-					file.Seek(sampleOffset);
 					sampleIO.ReadSample(sample, file);
 				}
 			}

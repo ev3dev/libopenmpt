@@ -14,11 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(push, 1)
-#endif
-
-struct PACKED UltFileHeader
+struct UltFileHeader
 {
 	char  signature[14];		// "MAS_UTrack_V00"
 	uint8 version;				// '1'...'4'
@@ -26,10 +22,10 @@ struct PACKED UltFileHeader
 	uint8 messageLength;		// Number of Lines
 };
 
-STATIC_ASSERT(sizeof(UltFileHeader) == 48);
+MPT_BINARY_STRUCT(UltFileHeader, 48)
 
 
-struct PACKED UltSample
+struct UltSample
 {
 	enum UltSampleFlags
 	{
@@ -38,27 +34,16 @@ struct PACKED UltSample
 		ULT_PINGPONGLOOP = 16,
 	};
 
-	char   name[32];
-	char   filename[12];
-	uint32 loopStart;
-	uint32 loopEnd;
-	uint32 sizeStart;
-	uint32 sizeEnd;
-	uint8  volume;		// 0-255, apparently prior to 1.4 this was logarithmic?
-	uint8  flags;		// above
-	uint16 speed;		// only exists for 1.4+
-	int16  finetune;
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		SwapBytesLE(loopStart);
-		SwapBytesLE(loopEnd);
-		SwapBytesLE(sizeStart);
-		SwapBytesLE(sizeEnd);
-		SwapBytesLE(speed);
-		SwapBytesLE(finetune);
-	}
+	char     name[32];
+	char     filename[12];
+	uint32le loopStart;
+	uint32le loopEnd;
+	uint32le sizeStart;
+	uint32le sizeEnd;
+	uint8le  volume;	// 0-255, apparently prior to 1.4 this was logarithmic?
+	uint8le  flags;		// above
+	uint16le speed;		// only exists for 1.4+
+	int16le  finetune;
 
 	// Convert an ULT sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -80,7 +65,7 @@ struct PACKED UltSample
 		mptSmp.nC5Speed = speed;
 		if(finetune)
 		{
-			mptSmp.nC5Speed = Util::Round<uint32>(mptSmp.nC5Speed * pow(2.0, finetune / (12.0 * 32768.0)));
+			mptSmp.Transpose(finetune / (12.0 * 32768.0));
 		}
 
 		if(flags & ULT_LOOP)
@@ -97,11 +82,8 @@ struct PACKED UltSample
 	}
 };
 
-STATIC_ASSERT(sizeof(UltSample) == 66);
+MPT_BINARY_STRUCT(UltSample, 66)
 
-#ifdef NEEDS_PRAGMA_PACK
-#pragma pack(pop)
-#endif
 
 /* Unhandled effects:
 5x1 - do not loop sample (x is unused)
@@ -115,7 +97,6 @@ convert them. */
 
 
 static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
-//--------------------------------------------------------------------------
 {
 
 	static const uint8 ultEffTrans[] =
@@ -222,7 +203,6 @@ static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
 
 
 static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
-//---------------------------------------------------------------------
 {
 	uint8 b, repeat = 1;
 	uint8 cmd1, cmd2;	// 1 = vol col, 2 = fx col in the original schismtracker code
@@ -286,7 +266,6 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 
 // Functor for postfixing ULT patterns (this is easier than just remembering everything WHILE we're reading the pattern events)
 struct PostFixUltCommands
-//=======================
 {
 	PostFixUltCommands(CHANNELINDEX numChannels)
 	{
@@ -349,25 +328,54 @@ struct PostFixUltCommands
 	}
 
 	std::vector<bool> isPortaActive;
-	bool writeT125;
 	CHANNELINDEX numChannels, curChannel;
+	bool writeT125;
 };
 
 
-bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------
+static bool ValidateHeader(const UltFileHeader &fileHeader)
 {
-	file.Rewind();
-	UltFileHeader fileHeader;
-
-	// Tracker ID
-	if(!file.ReadStruct(fileHeader)
-		|| fileHeader.version < '1'
+	if(fileHeader.version < '1'
 		|| fileHeader.version > '4'
-		|| memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature)) != 0)
+		|| std::memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature))
+		)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderULT(MemoryFileReader file, const uint64 *pfilesize)
+{
+	UltFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
+bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
+{
+	file.Rewind();
+
+	UltFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return false;
+	}
+	if(!ValidateHeader(fileHeader))
+	{
+		return false;
+	}
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
@@ -375,8 +383,8 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_ULT);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 
-	const char *versions[] = {"<1.4", "1.4", "1.5", "1.6"};
-	m_madeWithTracker = "UltraTracker ";
+	const MPT_UCHAR_TYPE *versions[] = {MPT_ULITERAL("<1.4"), MPT_ULITERAL("1.4"), MPT_ULITERAL("1.5"), MPT_ULITERAL("1.6")};
+	m_madeWithTracker = MPT_USTRING("UltraTracker ");
 	m_madeWithTracker += versions[fileHeader.version - '1'];
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.
@@ -395,11 +403,10 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 		// Annoying: v4 added a field before the end of the struct
 		if(fileHeader.version >= '4')
 		{
-			file.ReadConvertEndianness(sampleHeader);
+			file.ReadStruct(sampleHeader);
 		} else
 		{
 			file.ReadStructPartial(sampleHeader, 64);
-			sampleHeader.ConvertEndianness();
 			sampleHeader.finetune = sampleHeader.speed;
 			sampleHeader.speed = 8363;
 		}
@@ -408,12 +415,12 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 	}
 
-	Order.ReadAsByte(file, 256, 256, 0xFF, 0xFE);
+	ReadOrderFromFile<uint8>(Order(), file, 256, 0xFF, 0xFE);
 
 	m_nChannels = file.ReadUint8() + 1;
 	PATTERNINDEX numPats = file.ReadUint8() + 1;
 
-	if(GetNumChannels() > MAX_BASECHANNELS || numPats > MAX_PATTERNS)
+	if(GetNumChannels() > MAX_BASECHANNELS)
 		return false;
 
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
@@ -425,6 +432,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 			ChnSettings[chn].nPan = (chn & 1) ? 192 : 64;
 	}
 
+	Patterns.ResizeArray(numPats);
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		if(!Patterns.Insert(pat, 64))
@@ -439,7 +447,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 		{
-			note = Patterns[pat] + chn;
+			note = Patterns[pat].GetpModCommand(0, chn);
 			ROWINDEX row = 0;
 			while(row < 64)
 			{
