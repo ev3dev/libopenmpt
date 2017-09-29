@@ -7,12 +7,12 @@ Forwarded: no
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -325,7 +325,7 @@ libopenmpt_la_SOURCES += libopenmpt/libo
+@@ -380,7 +380,7 @@ libopenmpt_la_SOURCES += libopenmpt/libo
  
  if ENABLE_LIBOPENMPT_MODPLUG
  lib_LTLIBRARIES += libopenmpt_modplug.la
--libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0
-+libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 -Wl,--version-script=libmodplug/libmodplug.ver
+-libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
++libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined -Wl,--version-script=libmodplug/libmodplug.ver
  libopenmpt_modplug_la_CPPFLAGS = -I$(srcdir)/
  libopenmpt_modplug_la_CXXFLAGS = 
  libopenmpt_modplug_la_CFLAGS = 
