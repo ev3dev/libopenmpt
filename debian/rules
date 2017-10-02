@@ -19,5 +19,8 @@ override_dh_autoreconf:
 override_dh_auto_configure:
 	dh_auto_configure -- --disable-static --enable-libopenmpt_modplug
 
+override_dh_auto_build:
+	dh_auto_build -- all doxygen-doc
+
 override_dh_installchangelogs:
 	dh_installchangelogs libopenmpt/dox/changelog.md
