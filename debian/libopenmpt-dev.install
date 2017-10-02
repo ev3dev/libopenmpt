@@ -1,6 +1,3 @@
-usr/include/libopenmpt/libopenmpt.*
-usr/include/libopenmpt/libopenmpt_config.h
-usr/include/libopenmpt/libopenmpt_stream_*
-usr/include/libopenmpt/libopenmpt_version.h
+usr/include/libopenmpt
 usr/lib/*/libopenmpt.so
 usr/lib/*/pkgconfig/libopenmpt.pc
