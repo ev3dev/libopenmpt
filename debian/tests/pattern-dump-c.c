@@ -21,10 +21,14 @@ int main(int argc, char* argv[])
     }
 
     // Open module
-    openmpt_module* mod = openmpt_module_create(
+    openmpt_module* mod = openmpt_module_create2(
             openmpt_stream_get_file_callbacks(),
             in_file,
             openmpt_log_func_default,
+            NULL,
+            openmpt_error_func_default,
+            NULL,
+            NULL,
             NULL,
             NULL);
 
