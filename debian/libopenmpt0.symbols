@@ -22,10 +22,18 @@ libopenmpt.so.0 libopenmpt0 #MINVER#
  _ZN7openmpt10module_extD2Ev@Base 0.2.7025~beta20.1
  _ZN7openmpt10module_extaSERKS0_@Base 0.2.7025~beta20.1
  _ZN7openmpt16get_core_versionEv@Base 0.2.7025~beta20.1
+ (arch-bits=32)_ZN7openmpt17probe_file_headerEyPKhj@Base 0.3.0
+ (arch-bits=64)_ZN7openmpt17probe_file_headerEmPKhm@Base 0.3.0
+ (arch-bits=32)_ZN7openmpt17probe_file_headerEyPKhjy@Base 0.3.0
+ (arch-bits=64)_ZN7openmpt17probe_file_headerEmPKhmm@Base 0.3.0
+ (arch-bits=32)_ZN7openmpt17probe_file_headerEyRSi@Base 0.3.0
+ (arch-bits=64)_ZN7openmpt17probe_file_headerEmRSi@Base 0.3.0
  _ZN7openmpt19get_library_versionEv@Base 0.2.7025~beta20.1
+ _ZN7openmpt22could_open_probabilityERSidRSo@Base 0.3.0
  _ZN7openmpt22could_open_propabilityERSidRSo@Base 0.2.7025~beta20.1
  _ZN7openmpt22is_extension_supportedERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE@Base 0.2.7025~beta20.1
  _ZN7openmpt24get_supported_extensionsB5cxx11Ev@Base 0.2.7025~beta20.1
+ _ZN7openmpt38probe_file_header_get_recommended_sizeEv@Base 0.3.0
  _ZN7openmpt6module14select_subsongEi@Base 0.2.7025~beta20.1
  _ZN7openmpt6module16set_render_paramEii@Base 0.2.7025~beta20.1
  _ZN7openmpt6module16set_repeat_countEi@Base 0.2.7025~beta20.1
@@ -84,11 +92,17 @@ libopenmpt.so.0 libopenmpt0 #MINVER#
  _ZN7openmpt6moduleD2Ev@Base 0.2.7025~beta20.1
  _ZN7openmpt6moduleaSERKS0_@Base 0.2.7025~beta20.1
  _ZN7openmpt6string3getERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE@Base 0.2.7025~beta20.1
+ _ZN7openmpt9exceptionC1EOS0_@Base 0.3.0
  _ZN7openmpt9exceptionC1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE@Base 0.2.7025~beta20.1
+ _ZN7openmpt9exceptionC1ERKS0_@Base 0.3.0
+ _ZN7openmpt9exceptionC2EOS0_@Base 0.3.0
  _ZN7openmpt9exceptionC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE@Base 0.2.7025~beta20.1
+ _ZN7openmpt9exceptionC2ERKS0_@Base 0.3.0
  _ZN7openmpt9exceptionD0Ev@Base 0.2.7025~beta20.1
  _ZN7openmpt9exceptionD1Ev@Base 0.2.7025~beta20.1
  _ZN7openmpt9exceptionD2Ev@Base 0.2.7025~beta20.1
+ _ZN7openmpt9exceptionaSEOS0_@Base 0.3.0
+ _ZN7openmpt9exceptionaSERKS0_@Base 0.3.0
  _ZNK7openmpt6module12get_metadataERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE@Base 0.2.7025~beta20.1
  _ZNK7openmpt6module14get_num_ordersEv@Base 0.2.7025~beta20.1
  _ZNK7openmpt6module15get_current_rowEv@Base 0.2.7025~beta20.1
@@ -114,6 +128,7 @@ libopenmpt.so.0 libopenmpt0 #MINVER#
  _ZNK7openmpt6module20get_instrument_namesB5cxx11Ev@Base 0.2.7025~beta20.1
  _ZNK7openmpt6module20get_pattern_num_rowsEi@Base 0.2.7025~beta20.1
  _ZNK7openmpt6module20get_position_secondsEv@Base 0.2.7025~beta20.1
+ _ZNK7openmpt6module20get_selected_subsongEv@Base 0.3.0
  (arch-bits=32)_ZNK7openmpt6module26format_pattern_row_channelB5cxx11Eiiijb@Base 0.2.7025~beta20.1
  (arch-bits=64)_ZNK7openmpt6module26format_pattern_row_channelB5cxx11Eiiimb@Base 0.2.7025~beta20.1
  _ZNK7openmpt6module27get_current_channel_vu_leftEi@Base 0.2.7025~beta20.1
@@ -145,7 +160,17 @@ libopenmpt.so.0 libopenmpt0 #MINVER#
  _ZTVN7openmpt10module_extE@Base 0.2.7025~beta20.1
  _ZTVN7openmpt6moduleE@Base 0.2.7025~beta20.1
  _ZTVN7openmpt9exceptionE@Base 0.2.7025~beta20.1
+ openmpt_could_open_probability2@Base 0.3.0
+ openmpt_could_open_probability@Base 0.3.0
  openmpt_could_open_propability@Base 0.2.7025~beta20.1
+ openmpt_error_func_default@Base 0.3.0
+ openmpt_error_func_errno@Base 0.3.0
+ openmpt_error_func_errno_userdata@Base 0.3.0
+ openmpt_error_func_ignore@Base 0.3.0
+ openmpt_error_func_log@Base 0.3.0
+ openmpt_error_func_store@Base 0.3.0
+ openmpt_error_is_transient@Base 0.3.0
+ openmpt_error_string@Base 0.3.0
  openmpt_free_string@Base 0.2.7025~beta20.1
  openmpt_get_core_version@Base 0.2.7025~beta20.1
  openmpt_get_library_version@Base 0.2.7025~beta20.1
@@ -154,11 +179,22 @@ libopenmpt.so.0 libopenmpt0 #MINVER#
  openmpt_is_extension_supported@Base 0.2.7025~beta20.1
  openmpt_log_func_default@Base 0.2.7025~beta20.1
  openmpt_log_func_silent@Base 0.2.7025~beta20.1
+ openmpt_module_create2@Base 0.3.0
  openmpt_module_create@Base 0.2.7025~beta20.1
+ openmpt_module_create_from_memory2@Base 0.3.0
  openmpt_module_create_from_memory@Base 0.2.7025~beta20.1
  openmpt_module_ctl_get@Base 0.2.7025~beta20.1
  openmpt_module_ctl_set@Base 0.2.7025~beta20.1
  openmpt_module_destroy@Base 0.2.7025~beta20.1
+ openmpt_module_error_clear@Base 0.3.0
+ openmpt_module_error_get_last@Base 0.3.0
+ openmpt_module_error_get_last_message@Base 0.3.0
+ openmpt_module_error_set_last@Base 0.3.0
+ openmpt_module_ext_create@Base 0.3.0
+ openmpt_module_ext_create_from_memory@Base 0.3.0
+ openmpt_module_ext_destroy@Base 0.3.0
+ openmpt_module_ext_get_interface@Base 0.3.0
+ openmpt_module_ext_get_module@Base 0.3.0
  openmpt_module_format_pattern_row_channel@Base 0.2.7025~beta20.1
  openmpt_module_format_pattern_row_channel_command@Base 0.2.7025~beta20.1
  openmpt_module_get_channel_name@Base 0.2.7025~beta20.1
@@ -193,6 +229,7 @@ libopenmpt.so.0 libopenmpt0 #MINVER#
  openmpt_module_get_render_param@Base 0.2.7025~beta20.1
  openmpt_module_get_repeat_count@Base 0.2.7025~beta20.1
  openmpt_module_get_sample_name@Base 0.2.7025~beta20.1
+ openmpt_module_get_selected_subsong@Base 0.3.0
  openmpt_module_get_subsong_name@Base 0.2.7025~beta20.1
  openmpt_module_highlight_pattern_row_channel@Base 0.2.7025~beta20.1
  openmpt_module_highlight_pattern_row_channel_command@Base 0.2.7025~beta20.1
@@ -207,7 +244,13 @@ libopenmpt.so.0 libopenmpt0 #MINVER#
  openmpt_module_read_quad@Base 0.2.7025~beta20.1
  openmpt_module_read_stereo@Base 0.2.7025~beta20.1
  openmpt_module_select_subsong@Base 0.2.7025~beta20.1
+ openmpt_module_set_error_func@Base 0.3.0
+ openmpt_module_set_log_func@Base 0.3.0
  openmpt_module_set_position_order_row@Base 0.2.7025~beta20.1
  openmpt_module_set_position_seconds@Base 0.2.7025~beta20.1
  openmpt_module_set_render_param@Base 0.2.7025~beta20.1
  openmpt_module_set_repeat_count@Base 0.2.7025~beta20.1
+ openmpt_probe_file_header@Base 0.3.0
+ openmpt_probe_file_header_from_stream@Base 0.3.0
+ openmpt_probe_file_header_get_recommended_size@Base 0.3.0
+ openmpt_probe_file_header_without_filesize@Base 0.3.0
