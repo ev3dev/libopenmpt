@@ -1,8 +1,26 @@
-libopenmpt (0.3.1-1) UNRELEASED; urgency=medium
+libopenmpt (0.3.1-1) unstable; urgency=medium
 
-  *
+  * New upstream release.
 
- -- James Cowgill <jcowgill@debian.org>  Fri, 29 Sep 2017 21:13:40 +0100
+  * debian/control:
+    - Remove unnecessary testsuite autopkgtest header.
+    - Bump standards to 4.1.1 (no changes).
+  * debian/copyright:
+    - Update copyright including some modifications from decopy.
+  * debian/libopenmpt-dev.install:
+    - Install libopenmpt_ext.* headers which are now stable.
+  * debian/libopenmpt0.symbols:
+    - Add new symbols foudn in 0.3.0.
+  * debian/patches:
+    - Refresh patches.
+  * debian/rules:
+    - Build doxygen documentation again and update install path.
+  * debian/tests:
+    - Use openmpt_module_create2 in autopkgtests.
+  * debian/watch:
+    - Update for new versioning scheme.
+
+ -- James Cowgill <jcowgill@debian.org>  Mon, 02 Oct 2017 23:47:01 +0100
 
 libopenmpt (0.2.8760~beta27-1) unstable; urgency=medium
 
