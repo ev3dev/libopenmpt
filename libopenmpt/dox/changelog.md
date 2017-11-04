@@ -5,6 +5,29 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.2 (2017-11-04)
+
+ *  [**New**] Autotools `configure` and plain `Makefile` now honor the variable
+    `CXXSTDLIB_PCLIBSPRIVATE` which serves the sole purpose of listing the
+    standard library (or libraries) required for static linking. The contents of
+    this variable will be put in `libopenmpt.pc` `Libs.private` and used for
+    nothing else. See \ref libopenmpt_c_staticlinking .
+
+ *  [**Change**] Windows bin and dev release packages now use zip archives
+    instead of 7z archives as it had originally been intended for the 0.3.0
+    release.
+ *  [**Change**] openmpt123: The following combinations of options are not
+    deprecated because they made no real sense in the first place:
+    `--render --output`, `--ui --output-type`, `--batch --output-type`
+
+ *  [**Bug**] libopenmpt did not build on Android NDK 15c (and possibly
+    other versions between 12b and 15c as well).
+
+ *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
+    effect if a previous sample has already stopped playing.
+ *  MOD: Slides and delayed notes are executed on every repetition of a row with
+    row delay (fixes "ode to protracker").
+
 ### libopenmpt 0.3.1 (2017-09-28)
 
  *  [**Bug**] Windows: libopenmpt resource did not compile for release versions.

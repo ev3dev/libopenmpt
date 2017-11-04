@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.3.1+release.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.3.2+release.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -27,10 +27,13 @@ AC_SUBST([LIBOPENMPT_LTVER_CURRENT])
 AC_SUBST([LIBOPENMPT_LTVER_REVISION])
 AC_SUBST([LIBOPENMPT_LTVER_AGE])
 
-AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.3.1"], [svn version])
-AC_DEFINE([MPT_SVNVERSION], ["9016"], [svn version])
-AC_DEFINE([MPT_SVNDATE], ["2017-09-28T06:05:55.172831Z"], [svn date])
+AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.3.2"], [svn version])
+AC_DEFINE([MPT_SVNVERSION], ["9225"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["2017-11-04T15:56:50.275216Z"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [true], [is package])
+
+
+AC_ARG_VAR(CXXSTDLIB_PCLIBSPRIVATE, [C++ standard library (or libraries) required for static linking. This will be put in the pkg-config file libopenmpt.pc Libs.private field and used for nothing else.])
 
 
 AC_CANONICAL_HOST
@@ -126,7 +129,7 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
 
 
 LIBOPENMPT_REQUIRES_PRIVATE="$ZLIB_PKG $MPG123_PKG $OGG_PKG $VORBIS_PKG $VORBISFILE_PKG"
-LIBOPENMPT_LIBS_PRIVATE=""
+LIBOPENMPT_LIBS_PRIVATE="$CXXSTDLIB_PCLIBSPRIVATE"
 AC_SUBST([LIBOPENMPT_REQUIRES_PRIVATE])
 AC_SUBST([LIBOPENMPT_LIBS_PRIVATE])
 
