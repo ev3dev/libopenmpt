@@ -6,18 +6,22 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 %:
 	dh $@
 
-.PHONY: build
-build:
-	dh $@
+# Unfortunately dh does not play well with having a directory named "build" in
+# the top level source directory. Trying to create a phony target named "build"
+# in this rules file confuses dh in certain situations. Workaround this by
+# reimplementing all the build targets manually.
+.PHONY: build build-arch build-indep
+build: debian/build-stamp
+build-arch: build
+build-indep: build
 
-override_dh_autoreconf:
+debian/build-stamp:
+	dh_testdir
 	dh_autoreconf --as-needed
-
-override_dh_auto_configure:
 	dh_auto_configure -- --disable-static --enable-libopenmpt_modplug
-
-override_dh_auto_build:
 	dh_auto_build -- all doxygen-doc
+	dh_auto_test
+	touch debian/build-stamp
 
 override_dh_installchangelogs:
 	dh_installchangelogs libopenmpt/dox/changelog.md
