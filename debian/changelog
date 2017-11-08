@@ -1,8 +1,15 @@
-libopenmpt (0.3.2-1) UNRELEASED; urgency=medium
+libopenmpt (0.3.2-1) unstable; urgency=medium
 
-  *
+  * New upstream release.
 
- -- James Cowgill <jcowgill@debian.org>  Sat, 04 Nov 2017 22:19:15 +0000
+  * debian/control:
+    - Set Rules-Requires-Root: no.
+  * debian/rules:
+    - Remove unused variables.
+    - Implement build targets manually to workaround dh not playing well
+      with a "build" directory in the upstream source.
+
+ -- James Cowgill <jcowgill@debian.org>  Wed, 08 Nov 2017 23:31:31 +0000
 
 libopenmpt (0.3.1-1) unstable; urgency=medium
 
