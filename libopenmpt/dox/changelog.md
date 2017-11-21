@@ -5,6 +5,14 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.3 (2017-11-19)
+
+ *  [**New**] foo_openmpt: foo_openmpt now also works on Windows XP.
+
+ *  [**Bug**] All VS2015 and VS2017 project files targetting Windows XP did not
+    set compiler option `/Zc:threadSafeInit-` which caused at least the player
+    plugins `in_openmpt` and `xmp-openmpt` to fail to load.
+
 ### libopenmpt 0.3.2 (2017-11-04)
 
  *  [**New**] Autotools `configure` and plain `Makefile` now honor the variable
@@ -16,7 +24,7 @@ is just a high-level summary.
  *  [**Change**] Windows bin and dev release packages now use zip archives
     instead of 7z archives as it had originally been intended for the 0.3.0
     release.
- *  [**Change**] openmpt123: The following combinations of options are not
+ *  [**Change**] openmpt123: The following combinations of options are now
     deprecated because they made no real sense in the first place:
     `--render --output`, `--ui --output-type`, `--batch --output-type`
 
