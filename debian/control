@@ -18,7 +18,7 @@ Build-Depends:
  portaudio19-dev,
  zlib1g-dev
 Build-Conflicts: autoconf-archive
-Standards-Version: 4.1.1
+Standards-Version: 4.1.2
 Rules-Requires-Root: no
 Homepage: https://lib.openmpt.org/libopenmpt/
 Vcs-Git: https://anonscm.debian.org/git/pkg-multimedia/libopenmpt.git
