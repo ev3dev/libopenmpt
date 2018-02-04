@@ -1,11 +1,11 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: libopenmpt
 Source: https://lib.openmpt.org/libopenmpt/
 
 Files: *
 Copyright:
  1997-2003, Olivier Lapicque
- 2004-2017, OpenMPT contributors
+ 2004-2018, OpenMPT contributors
 License: BSD-3-clause
 
 Files:
@@ -32,7 +32,7 @@ Copyright: 1994, X Consortium
 License: X11
 
 Files: debian/*
-Copyright: 2016-2017, James Cowgill <jcowgill@debian.org>
+Copyright: 2016-2018, James Cowgill <jcowgill@debian.org>
 License: BSD-3-clause
 
 Files:
