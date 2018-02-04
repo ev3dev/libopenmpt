@@ -21,8 +21,8 @@ Build-Conflicts: autoconf-archive
 Standards-Version: 4.1.2
 Rules-Requires-Root: no
 Homepage: https://lib.openmpt.org/libopenmpt/
-Vcs-Git: https://anonscm.debian.org/git/pkg-multimedia/libopenmpt.git
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-multimedia/libopenmpt.git
+Vcs-Git: https://salsa.debian.org/multimedia-team/libopenmpt.git
+Vcs-Browser: https://salsa.debian.org/multimedia-team/libopenmpt
 
 Package: openmpt123
 Section: sound
