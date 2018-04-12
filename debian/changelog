@@ -1,8 +1,9 @@
-libopenmpt (0.2.7386~beta20.3-3+deb9u3) UNRELEASED; urgency=medium
+libopenmpt (0.2.7386~beta20.3-3+deb9u3) stretch; urgency=medium
 
-  *
+  * Add patch to fix CVE-2018-10017 (Closes: #895406).
+    - up11: Out-of-bounds read loading IT / MO3 files with many pattern loops.
 
- -- James Cowgill <jcowgill@debian.org>  Thu, 12 Apr 2018 10:06:29 +0100
+ -- James Cowgill <jcowgill@debian.org>  Thu, 12 Apr 2018 10:14:53 +0100
 
 libopenmpt (0.2.7386~beta20.3-3+deb9u2) stretch; urgency=medium
 
