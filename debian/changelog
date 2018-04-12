@@ -1,3 +1,9 @@
+libopenmpt (0.2.7386~beta20.3-3+deb9u3) UNRELEASED; urgency=medium
+
+  *
+
+ -- James Cowgill <jcowgill@debian.org>  Thu, 12 Apr 2018 10:06:29 +0100
+
 libopenmpt (0.2.7386~beta20.3-3+deb9u2) stretch; urgency=medium
 
   * Add security patches (Closes: #867579).
