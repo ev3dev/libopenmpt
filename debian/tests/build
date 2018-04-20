@@ -3,10 +3,10 @@
 
 set -e
 
-# Require $ADTTMP for temporary build files
-if [ -z "$ADTTMP" ]
+# Require $AUTOPKGTEST_TMP for temporary build files
+if [ -z "$AUTOPKGTEST_TMP" ]
 then
-	echo 'Required envvar "$ADTTMP" is not set' >&2
+	echo 'Required envvar "$AUTOPKGTEST_TMP" is not set' >&2
 	exit 1
 fi
 
@@ -22,22 +22,22 @@ run_dump() {
 }
 
 # Build programs
-gcc -Wall -o "$ADTTMP/pattern-dump-c1" pattern-dump-c.c -lopenmpt
+gcc -Wall -o "$AUTOPKGTEST_TMP/pattern-dump-c1" pattern-dump-c.c -lopenmpt
 echo "build1: OK"
-gcc -Wall -o "$ADTTMP/pattern-dump-c2" pattern-dump-c.c $(pkg-config --cflags --libs libopenmpt)
+gcc -Wall -o "$AUTOPKGTEST_TMP/pattern-dump-c2" pattern-dump-c.c $(pkg-config --cflags --libs libopenmpt)
 echo "build2: OK"
 
-g++ -Wall -o "$ADTTMP/pattern-dump-cpp1" pattern-dump-cpp.cpp -lopenmpt
+g++ -Wall -o "$AUTOPKGTEST_TMP/pattern-dump-cpp1" pattern-dump-cpp.cpp -lopenmpt
 echo "build3: OK"
-g++ -Wall -o "$ADTTMP/pattern-dump-cpp2" pattern-dump-cpp.cpp $(pkg-config --cflags --libs libopenmpt)
+g++ -Wall -o "$AUTOPKGTEST_TMP/pattern-dump-cpp2" pattern-dump-cpp.cpp $(pkg-config --cflags --libs libopenmpt)
 echo "build4: OK"
 
 # Run them
-run_dump "$ADTTMP/pattern-dump-c1"
+run_dump "$AUTOPKGTEST_TMP/pattern-dump-c1"
 echo "run1: OK"
-run_dump "$ADTTMP/pattern-dump-c2"
+run_dump "$AUTOPKGTEST_TMP/pattern-dump-c2"
 echo "run2: OK"
-run_dump "$ADTTMP/pattern-dump-cpp1"
+run_dump "$AUTOPKGTEST_TMP/pattern-dump-cpp1"
 echo "run3: OK"
-run_dump "$ADTTMP/pattern-dump-cpp2"
+run_dump "$AUTOPKGTEST_TMP/pattern-dump-cpp2"
 echo "run4: OK"

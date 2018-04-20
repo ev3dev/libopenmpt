@@ -5,10 +5,10 @@
 
 set -e
 
-# Require $ADTTMP for temporary build files
-if [ -z "$ADTTMP" ]
+# Require $AUTOPKGTEST_TMP for temporary build files
+if [ -z "$AUTOPKGTEST_TMP" ]
 then
-	echo 'Required envvar "$ADTTMP" is not set' >&2
+	echo 'Required envvar "$AUTOPKGTEST_TMP" is not set' >&2
 	exit 1
 fi
 
@@ -24,13 +24,13 @@ run_dump() {
 }
 
 # Build programs
-gcc -Wall -o "$ADTTMP/pattern-dump-modplug1" pattern-dump-modplug.c -lmodplug
+gcc -Wall -o "$AUTOPKGTEST_TMP/pattern-dump-modplug1" pattern-dump-modplug.c -lmodplug
 echo "build1: OK"
-gcc -Wall -o "$ADTTMP/pattern-dump-modplug2" pattern-dump-modplug.c $(pkg-config --cflags --libs libmodplug)
+gcc -Wall -o "$AUTOPKGTEST_TMP/pattern-dump-modplug2" pattern-dump-modplug.c $(pkg-config --cflags --libs libmodplug)
 echo "build2: OK"
 
 # Run them
-run_dump "$ADTTMP/pattern-dump-modplug1"
+run_dump "$AUTOPKGTEST_TMP/pattern-dump-modplug1"
 echo "run1: OK"
-run_dump "$ADTTMP/pattern-dump-modplug2"
+run_dump "$AUTOPKGTEST_TMP/pattern-dump-modplug2"
 echo "run2: OK"
