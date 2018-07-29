@@ -1,3 +1,11 @@
+libopenmpt (0.3.11-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Fix crash with some malformed custom tunings in MPTM files.
+      (Closes: #904874)
+
+ -- James Cowgill <jcowgill@debian.org>  Sun, 29 Jul 2018 13:29:16 +0800
+
 libopenmpt (0.3.10-1) unstable; urgency=medium
 
   * New upstream release.
