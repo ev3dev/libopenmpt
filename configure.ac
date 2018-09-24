@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.3.11+release.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.3.12+release.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -27,9 +27,9 @@ AC_SUBST([LIBOPENMPT_LTVER_CURRENT])
 AC_SUBST([LIBOPENMPT_LTVER_REVISION])
 AC_SUBST([LIBOPENMPT_LTVER_AGE])
 
-AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.3.11"], [svn version])
-AC_DEFINE([MPT_SVNVERSION], ["10633"], [svn version])
-AC_DEFINE([MPT_SVNDATE], ["2018-07-28T11:50:00.062292Z"], [svn date])
+AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.3.12"], [svn version])
+AC_DEFINE([MPT_SVNVERSION], ["10856"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["2018-09-24T06:42:52.921590Z"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [true], [is package])
 
 
@@ -241,7 +241,7 @@ AS_IF([test "x$with_portaudiocpp" != "xno"],
 AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudio = x1])
 
 # Optional disabled openmpt123 dependency: libsdl2
-AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2.]))
+AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2. Enabling libsdl2 automatically disables libsdl.]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sdl2" = "xyes"],
  [
@@ -253,9 +253,14 @@ AS_IF([test "x$with_sdl2" = "xyes"],
 # Optional disabled openmpt123 dependency: libsdl
 AC_ARG_WITH([sdl], AS_HELP_STRING([--with-sdl], [Enable use of libsdl.]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
+AS_IF([test "x$with_sdl2" != "xno"],[
 AS_IF([test "x$with_sdl" = "xyes"],
  [
   PKG_CHECK_MODULES([SDL], [sdl], [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])], [AC_MSG_ERROR([Unable to find libsdl.])])
+ ]
+)],
+ [
+  AC_MSG_WARN([Skipping libsdl because libsdl2 is enabled.])
  ]
 )
 ])
