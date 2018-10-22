@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.3.12+release.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.3.13+release.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -27,9 +27,9 @@ AC_SUBST([LIBOPENMPT_LTVER_CURRENT])
 AC_SUBST([LIBOPENMPT_LTVER_REVISION])
 AC_SUBST([LIBOPENMPT_LTVER_AGE])
 
-AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.3.12"], [svn version])
-AC_DEFINE([MPT_SVNVERSION], ["10856"], [svn version])
-AC_DEFINE([MPT_SVNDATE], ["2018-09-24T06:42:52.921590Z"], [svn date])
+AC_DEFINE([MPT_SVNURL], ["https://source.openmpt.org/svn/openmpt/tags/libopenmpt-0.3.13"], [svn version])
+AC_DEFINE([MPT_SVNVERSION], ["10931"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["2018-10-21T14:14:31.914995Z"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [true], [is package])
 
 
