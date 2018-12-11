@@ -1,8 +1,7 @@
 Source: libopenmpt
 Section: libs
 Priority: optional
-Maintainer: Debian Multimedia Maintainers <pkg-multimedia-maintainers@lists.alioth.debian.org>
-Uploaders: James Cowgill <jcowgill@debian.org>
+Maintainer: Jakub Vanek <linuxtardis@gmail.com>
 Build-Depends:
  debhelper (>= 10~),
  doxygen,
@@ -19,8 +18,8 @@ Build-Depends:
 Build-Conflicts: autoconf-archive
 Standards-Version: 3.9.8
 Homepage: https://lib.openmpt.org/libopenmpt/
-Vcs-Git: https://anonscm.debian.org/git/pkg-multimedia/libopenmpt.git
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-multimedia/libopenmpt.git
+Vcs-Git: https://github.com/ev3dev/libopenmpt.git
+Vcs-Browser: https://github.com/ev3dev/libopenmpt
 Testsuite: autopkgtest
 
 Package: openmpt123

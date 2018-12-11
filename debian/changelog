@@ -1,3 +1,9 @@
+libopenmpt (0.2.7386~beta20.3-3+deb9u3ev3dev1) UNRELEASED; urgency=medium
+
+  * ev3dev takeover
+
+ -- David Lechner <david@lechnology.com>  Tue, 11 Dec 2018 17:54:54 -0600
+
 libopenmpt (0.2.7386~beta20.3-3+deb9u3) stretch; urgency=medium
 
   * Add patch to fix CVE-2018-10017 (Closes: #895406).
