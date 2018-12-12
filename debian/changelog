@@ -1,8 +1,10 @@
-libopenmpt (0.2.7386~beta20.3-3+deb9u3ev3dev1) UNRELEASED; urgency=medium
+libopenmpt (0.2.7386~beta20.3-3+deb9u3ev3dev1) stable; urgency=medium
 
-  * ev3dev takeover
+  * Add patch to fix stack overflow on library initialization (Closes: #916222)
+    - up12: Fix dlopen() crashes caused by a big stack allocation
+      happening in libopenmpt initialization code.
 
- -- David Lechner <david@lechnology.com>  Tue, 11 Dec 2018 17:54:54 -0600
+ -- Jakub Vanek <linuxtardis@gmail.com>  Wed, 12 Dec 2018 01:28:33 +0100
 
 libopenmpt (0.2.7386~beta20.3-3+deb9u3) stretch; urgency=medium
 
